@@ -50,44 +50,48 @@ textarea{min-height:80px;resize:vertical}
 .bg2{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .gg{background:var(--gl);color:#27500A}.ga{background:var(--al);color:#633806}.gr{background:var(--rl);color:#501313}.gb{background:var(--bl);color:#0C447C}
 
-/* HISTORY */
-.ai{background:#fff;border-radius:12px;border:1px solid var(--bd);margin-bottom:10px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* HISTORY LIST */
+.ai{background:#fff;border-radius:12px;border:1px solid var(--bd);margin-bottom:10px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s}
+.ai:active{opacity:.85}
 .ah{display:flex;align-items:center;padding:14px 16px;gap:10px}
 .an{font-size:15px;font-weight:600}
 .ad{font-size:12px;color:var(--mu);margin-top:2px}
 
-/* FULL SCREEN PANEL */
-.panel{position:fixed;inset:0;background:#fff;z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .25s ease}
+/* FULL SCREEN SLIDING PANEL */
+.panel{position:fixed;inset:0;background:#fff;z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .panel.open{transform:translateX(0)}
 .ph{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:#fff;z-index:10}
 .pb-btn{background:none;border:none;cursor:pointer;font-size:22px;color:var(--mu);padding:4px;line-height:1;flex-shrink:0}
 .ph-title{font-size:16px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pb{padding:16px}
-.big-score{text-align:center;padding:24px 0 8px}
-.big-num{font-size:56px;font-weight:700;line-height:1}
-.big-lbl{font-size:14px;color:var(--mu);margin-top:4px}
-.dp-meta{font-size:13px;color:var(--mu);text-align:center;margin-bottom:20px}
-.dp-sec{margin-bottom:20px}
+
+/* AUDIT DETAIL */
+.big-score{text-align:center;padding:28px 0 10px}
+.big-num{font-size:64px;font-weight:700;line-height:1}
+.big-sub{font-size:14px;color:var(--mu);margin-top:6px}
+.dp-meta{font-size:13px;color:var(--mu);text-align:center;margin-bottom:24px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.dp-sec{margin-bottom:22px}
 .dp-st{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bg)}
-.dp-text{font-size:15px;line-height:1.7;color:var(--tx);background:var(--bg);border-radius:10px;padding:12px 14px}
+.dp-text{font-size:15px;line-height:1.7;color:var(--tx);background:var(--bg);border-radius:10px;padding:14px}
 .br{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.bl2{font-size:13px;width:120px;flex-shrink:0}
-.bt{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
-.bf{height:100%;border-radius:4px}
-.bv{font-size:12px;font-weight:600;color:var(--mu);width:28px;text-align:right}
+.bl2{font-size:13px;width:110px;flex-shrink:0;color:var(--tx)}
+.bt{flex:1;height:10px;background:var(--bg);border-radius:5px;overflow:hidden}
+.bf{height:100%;border-radius:5px;transition:width .4s}
+.bv{font-size:13px;font-weight:600;color:var(--mu);width:30px;text-align:right}
 .tag-row{display:flex;gap:8px;flex-wrap:wrap}
-.tag{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:500}
+.tag{font-size:12px;padding:5px 12px;border-radius:20px;font-weight:600}
 .tw{background:var(--rl);color:#A32D2D}.ts{background:var(--gl);color:#3B6D11}
-.del-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid #F09595;background:var(--rl);color:#A32D2D;margin-top:8px}
+.del-btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid #F09595;background:var(--rl);color:#A32D2D;margin-top:10px}
+.del-btn:active{background:#F7C1C1}
 
 /* CONFIRM */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.open{opacity:1;pointer-events:all}
 .ob{background:#fff;border-radius:16px;padding:24px;max-width:320px;width:100%}
 .ob h3{font-size:16px;font-weight:600;margin-bottom:8px}
 .ob p{font-size:14px;color:var(--mu);margin-bottom:20px;line-height:1.5}
 .or{display:flex;gap:10px}
-.or button{flex:1;padding:11px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none}
+.or button{flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none}
 .oc{background:var(--bg);color:var(--tx)}.od{background:var(--r);color:#fff}
 
 /* STATS */
@@ -95,46 +99,57 @@ textarea{min-height:80px;resize:vertical}
 .kpi{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:14px}
 .kpi .l{font-size:11px;color:var(--mu);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
 .kpi .v{font-size:22px;font-weight:600}
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.filter-bar select,.filter-bar input[type=date]{flex:1;min-width:120px;font-size:13px;padding:8px 10px}
+
+/* STATS FILTERS - ameliores */
+.filter-section{background:#fff;border-radius:12px;border:1px solid var(--bd);padding:16px;margin-bottom:14px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filter-row:last-child{margin-bottom:0}
+.filter-row select,.filter-row input[type=date]{flex:1;min-width:130px;font-size:13px;padding:8px 10px}
+.filter-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.ftab{padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--mu);-webkit-tap-highlight-color:transparent}
+.ftab.active{background:var(--g);color:#fff;border-color:var(--g)}
+.cmp-block{background:#fff;border-radius:12px;border:1px solid var(--bd);padding:16px;margin-bottom:14px}
+.cmp-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:14px}
+.cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bg)}
+.cmp-row:last-child{border:none;margin:0;padding:0}
+.cmp-name{font-size:13px;font-weight:600;width:100px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp-bars{flex:1}
+.cmp-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.cmp-bar-label{font-size:10px;color:var(--mu);width:50px;flex-shrink:0;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.cmp-bt{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.cmp-bf{height:100%;border-radius:3px}
+.cmp-bv{font-size:10px;font-weight:600;color:var(--mu);width:22px;text-align:right}
+.cmp-score{font-size:20px;font-weight:700;width:44px;text-align:right;flex-shrink:0}
 .cmp-table{width:100%;border-collapse:collapse;font-size:13px}
-.cmp-table th{text-align:left;color:var(--mu);font-weight:500;padding:8px 8px;border-bottom:1px solid var(--bd)}
-.cmp-table td{padding:8px 8px;border-bottom:1px solid #f0efeb;vertical-align:middle}
+.cmp-table th{text-align:left;color:var(--mu);font-weight:500;padding:8px;border-bottom:1px solid var(--bd)}
+.cmp-table td{padding:8px;border-bottom:1px solid #f0efeb;vertical-align:middle}
 
 /* MISSIONS */
 .missions-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .missions-topbar span{font-size:13px;color:var(--mu);font-weight:500}
-.add-mission-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--g);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.add-mission-btn:active{transform:scale(.97)}
+.add-mission-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--g);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
 .mc{background:#fff;border-radius:12px;border:1px solid var(--bd);margin-bottom:10px;overflow:hidden}
 .mc-header{display:flex;align-items:center;padding:14px 16px;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.mc-header:active{opacity:.8}
 .mc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--bl)}
 .mc-info{flex:1;min-width:0}
 .mc-name{font-size:15px;font-weight:600}
 .mc-type{font-size:12px;color:var(--mu);margin-top:2px}
 .sp{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.sp-todo{background:#f0efeb;color:#666}
-.sp-wip{background:var(--al);color:#633806}
-.sp-done{background:var(--gl);color:#27500A}
-.sp-urgent{background:var(--rl);color:#A32D2D}
-
-/* MISSION FORM in panel */
+.sp-todo{background:#f0efeb;color:#666}.sp-wip{background:var(--al);color:#633806}.sp-done{background:var(--gl);color:#27500A}.sp-urgent{background:var(--rl);color:#A32D2D}
 .mf-group{margin-bottom:16px}
 .mf-group label{margin-bottom:6px}
 .mf-group textarea{min-height:90px}
-.mf-group select{font-size:14px}
 .axes-list{margin-top:8px}
 .axe-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
 .axe-row input{font-size:14px;flex:1}
 .axe-del{background:var(--rl);border:none;color:#A32D2D;border-radius:6px;padding:0 10px;font-size:18px;cursor:pointer;height:40px;flex-shrink:0;font-weight:600}
 .add-axe-btn{font-size:13px;color:var(--g);background:none;border:1px dashed var(--g);border-radius:8px;padding:8px;width:100%;cursor:pointer;margin-top:4px}
 .icon-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.icon-opt{width:40px;height:40px;border-radius:8px;border:1px solid var(--bd);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.icon-opt{width:40px;height:40px;border-radius:8px;border:1px solid var(--bd);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .icon-opt.selected{border:2px solid var(--g);background:var(--gl)}
 .save-btn{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;background:var(--g);color:#fff;margin-top:4px}
-.save-btn:active{transform:scale(.98)}
 .del-mission-btn{width:100%;padding:11px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid #F09595;background:var(--rl);color:#A32D2D;margin-top:10px}
+.dp-sec-view{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bg)}
 
 .empty{text-align:center;padding:50px 20px;color:var(--mu);font-size:14px;line-height:1.6}
 .spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:sp .8s linear infinite;margin:30px auto}
@@ -151,22 +166,13 @@ textarea{min-height:80px;resize:vertical}
 </header>
 <div class="toast" id="toast"></div>
 
-<!-- CONFIRM AUDIT DELETE -->
 <div class="ov" id="cov">
-  <div class="ob">
-    <h3>Supprimer cet audit ?</h3>
-    <p id="ct">Action irreversible.</p>
-    <div class="or"><button class="oc" onclick="closeC()">Annuler</button><button class="od" onclick="doDelete()">Supprimer</button></div>
-  </div>
+  <div class="ob"><h3>Supprimer cet audit ?</h3><p id="ct">Action irreversible.</p>
+  <div class="or"><button class="oc" onclick="closeC()">Annuler</button><button class="od" onclick="doDelete()">Supprimer</button></div></div>
 </div>
-
-<!-- CONFIRM MISSION DELETE -->
 <div class="ov" id="mcov">
-  <div class="ob">
-    <h3>Supprimer cette mission ?</h3>
-    <p id="mct">Action irreversible.</p>
-    <div class="or"><button class="oc" onclick="closeMC()">Annuler</button><button class="od" onclick="doDeleteMission()">Supprimer</button></div>
-  </div>
+  <div class="ob"><h3>Supprimer cette mission ?</h3><p id="mct">Action irreversible.</p>
+  <div class="or"><button class="oc" onclick="closeMC()">Annuler</button><button class="od" onclick="doDeleteMission()">Supprimer</button></div></div>
 </div>
 
 <!-- AUDIT DETAIL PANEL -->
@@ -179,17 +185,17 @@ textarea{min-height:80px;resize:vertical}
   <div class="pb" id="dp-body"></div>
 </div>
 
-<!-- MISSION PANEL (view + edit) -->
+<!-- MISSION PANEL -->
 <div class="panel" id="mp">
   <div class="ph">
     <button class="pb-btn" onclick="closePanel('mp')">&#8592;</button>
     <span class="ph-title" id="mp-title">Mission</span>
-    <button class="pb-btn" id="mp-edit-toggle" onclick="toggleMissionEdit()" style="font-size:14px;font-weight:600;color:var(--g);padding:4px 8px;border:1px solid var(--g);border-radius:8px">Modifier</button>
+    <button class="pb-btn" id="mp-edit-toggle" onclick="toggleMissionEdit()" style="font-size:13px;font-weight:600;color:var(--g);padding:5px 10px;border:1px solid var(--g);border-radius:8px">Modifier</button>
   </div>
   <div class="pb" id="mp-body"></div>
 </div>
 
-<!-- PAGES -->
+<!-- PAGE AUDIT -->
 <div class="pg active" id="page-audit">
   <div class="card">
     <div class="fr"><label>Boutique *</label><input type="text" id="shopName" placeholder="Ex: Galzin Pompignane"/></div>
@@ -208,8 +214,10 @@ textarea{min-height:80px;resize:vertical}
   <button class="btn bs" onclick="resetAudit()">Reinitialiser</button>
 </div>
 
+<!-- PAGE HISTORIQUE -->
 <div class="pg" id="page-history"><div id="hc"><div class="spinner"></div></div></div>
 
+<!-- PAGE MISSIONS -->
 <div class="pg" id="page-missions">
   <div class="missions-topbar">
     <span id="missions-count">0 missions</span>
@@ -218,6 +226,7 @@ textarea{min-height:80px;resize:vertical}
   <div id="missions-list"></div>
 </div>
 
+<!-- PAGE STATS -->
 <div class="pg" id="page-stats"><div id="stc"><div class="spinner"></div></div></div>
 
 <nav>
@@ -238,7 +247,6 @@ textarea{min-height:80px;resize:vertical}
 <script>
 var SB='https://fgvvfycyxulnwzttczyq.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZndnZmeWN5eHVsbnd6dHRjenlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDI2MzAsImV4cCI6MjA4OTkxODYzMH0.0-NzalmqzSpOSUofuBg-q-cBfql7xKvU101is7s4uWQ';
-
 var CR=[
   {cat:'Vitrine & entree',key:'vitrine',items:['Proprete vitrine','Mise en valeur produits','Signaletique / prix','Attractivite exterieure']},
   {cat:'Accueil & service',key:'accueil',items:['Sourire & bonjour','Rapidite service','Connaissance produits','Gestion file attente']},
@@ -246,22 +254,19 @@ var CR=[
   {cat:'Espace interieur',key:'espace_interieur',items:['Proprete boutique','Ambiance & deco','Organisation comptoir','Affichage Galzin']},
   {cat:'Digital & reseaux',key:'digital',items:['QR code / reseaux visibles','Carte fidelite proposee','Commande en ligne mentionnee','Google Maps a jour']}
 ];
-
 var ICONS=['🌊','💧','🥐','🏡','🏘️','🥖','🎯','📍','🏪','⭐','📢','💡','🤝','📊','🚀'];
 var STATUS={'todo':'A faire','wip':'En cours','done':'Termine','urgent':'Urgent'};
 var STATUS_CLS={'todo':'sp-todo','wip':'sp-wip','done':'sp-done','urgent':'sp-urgent'};
-
 var MISSIONS_DEFAULT=[
-  {id:'m1',boutique:'Palavas Quai',icon:'🌊',type_label:'Concurrence + Pro',problematique:'Concurrence directe avec Le Fournil d\'Eugene. Developpement du compte client pro.',axes:['Analyser offre et prix du Fournil d\'Eugene','Identifier points de difference Galzin vs concurrent','Strategie fidelisation client pro (restaurateurs, hotels)','Mettre en place offre B2B (livraison, commandes en gros)'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},
+  {id:'m1',boutique:'Palavas Quai',icon:'🌊',type_label:'Concurrence + Pro',problematique:"Concurrence directe avec Le Fournil d'Eugene. Developpement du compte client pro.",axes:["Analyser offre et prix du Fournil d'Eugene",'Identifier points de difference Galzin vs concurrent','Strategie fidelisation client pro (restaurateurs, hotels)','Mettre en place offre B2B (livraison, commandes en gros)'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},
   {id:'m2',boutique:'Balaruc',icon:'💧',type_label:'Concurrence + Partenariats',problematique:'Concurrence avec Feuillette. Developpement comptes pro et partenariats locaux.',axes:['Etudier offre Feuillette (prix, produits, communication)','Cartographier pros locaux (restaurants, hotels, campings)','Proposer partenariats locaux (menus, paniers petit-dej)','Creer kit commercial B2B Galzin Balaruc'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},
   {id:'m3',boutique:'Eugene et Marie',icon:'🥐',type_label:'Offre Restauration',problematique:'Analyse offre et mise en avant pour attirer de nouveaux clients sur axe restauration.',axes:['Auditer offre snacking / restauration actuelle','Identifier creneaux horaires sous-exploites','Proposer formules dejeuner attractives','Creer contenu reseaux sociaux axe restauration'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},
   {id:'m4',boutique:'Fabreuges',icon:'🏡',type_label:'Offre Restauration',problematique:'Analyse offre restauration. Visite prevue demain 09h30.',axes:['Rencontrer equipe, reperer bureau et imprimante','Auditer offre restauration disponible','Analyser clientele et habitudes achat','Proposer actions marketing adaptees'],statut:'wip',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:'Visite demain 09h30 - voir acces bureau et imprimante.'},
   {id:'m5',boutique:'Baillargues',icon:'🏘️',type_label:'Analyse Offre',problematique:'Analyse offre et mise en avant pour attirer de nouveaux clients.',axes:['Analyser zone de chalandise et clientele','Identifier opportunites de visibilite locale','Proposer animations et evenements en boutique','Renforcer presence digitale locale'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''}
 ];
+var ratings={},pendingId=null,pendingMissionId=null,allAudits=[],missions=[],editingMission=false,currentMissionId=null,statsMode='global';
 
-var ratings={},pendingId=null,pendingMissionId=null,allAudits=[],missions=[],editingMission=false,currentMissionId=null;
-
-/* API Supabase */
+/* API */
 async function api(m,p,b){
   setSy(true);
   try{var r=await fetch(SB+'/rest/v1/'+p,{method:m,headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK,'Prefer':m==='POST'?'return=representation':''},body:b?JSON.stringify(b):undefined});var t=await r.text();setSy(false);return t?JSON.parse(t):null;}
@@ -270,113 +275,7 @@ async function api(m,p,b){
 function setSy(v){document.getElementById('sd').className='dot '+(v?'sy':'on');document.getElementById('sl').textContent=v?'Synchronisation...':'Donnees en ligne';}
 function setOff(){document.getElementById('sd').className='dot';document.getElementById('sl').textContent='Hors ligne';}
 
-/* MISSIONS */
-function loadMissions(){
-  var saved=localStorage.getItem('galzin_missions_v2');
-  missions=saved?JSON.parse(saved):JSON.parse(JSON.stringify(MISSIONS_DEFAULT));
-  renderMissions();
-}
-function saveMissions(){localStorage.setItem('galzin_missions_v2',JSON.stringify(missions));}
-
-function renderMissions(){
-  var order=['urgent','wip','todo','done'];
-  var sorted=missions.slice().sort(function(a,b){return order.indexOf(a.statut)-order.indexOf(b.statut);});
-  document.getElementById('missions-count').textContent=missions.length+' mission'+(missions.length>1?'s':'');
-  document.getElementById('missions-list').innerHTML=sorted.length?sorted.map(function(m){
-    return'<div class="mc"><div class="mc-header" onclick="openMission(\''+m.id+'\')">'
-      +'<div class="mc-icon">'+m.icon+'</div>'
-      +'<div class="mc-info"><div class="mc-name">'+m.boutique+'</div><div class="mc-type">'+m.type_label+'</div></div>'
-      +'<span class="sp '+STATUS_CLS[m.statut]+'">'+STATUS[m.statut]+'</span>'
-      +'<span style="font-size:18px;color:var(--mu);margin-left:6px">›</span>'
-      +'</div></div>';
-  }).join(''):'<div class="empty">Aucune mission.<br>Appuie sur "+ Nouvelle mission" !</div>';
-}
-
-function newMission(){
-  currentMissionId=null;editingMission=true;
-  document.getElementById('mp-title').textContent='Nouvelle mission';
-  document.getElementById('mp-edit-toggle').textContent='';
-  document.getElementById('mp-edit-toggle').style.display='none';
-  document.getElementById('mp-body').innerHTML=buildMissionForm(null);
-  document.getElementById('mp').classList.add('open');
-}
-
-function openMission(id){
-  currentMissionId=id;editingMission=false;
-  var m=missions.find(function(x){return x.id===id;});if(!m)return;
-  document.getElementById('mp-title').textContent=m.boutique;
-  document.getElementById('mp-edit-toggle').textContent='Modifier';
-  document.getElementById('mp-edit-toggle').style.display='';
-  renderMissionView(m);
-  document.getElementById('mp').classList.add('open');
-}
-
-function toggleMissionEdit(){
-  editingMission=!editingMission;
-  var m=missions.find(function(x){return x.id===currentMissionId;});if(!m)return;
-  document.getElementById('mp-edit-toggle').textContent=editingMission?'Annuler':'Modifier';
-  if(editingMission){document.getElementById('mp-body').innerHTML=buildMissionForm(m);}
-  else{renderMissionView(m);}
-}
-
-function renderMissionView(m){
-  var axesHtml=m.axes.map(function(a,i){return'<div style="display:flex;gap:10px;margin-bottom:8px;font-size:14px"><span style="color:var(--g);font-weight:700;flex-shrink:0">'+(i+1)+'.</span><span>'+a+'</span></div>';}).join('');
-  document.getElementById('mp-body').innerHTML=
-    '<div style="margin-bottom:16px"><span class="sp '+STATUS_CLS[m.statut]+'" style="font-size:13px;padding:6px 14px">'+STATUS[m.statut]+'</span></div>'
-    +'<div class="dp-sec"><div class="dp-st">Problematique</div><div class="dp-text">'+m.problematique+'</div></div>'
-    +(m.axes.length?'<div class="dp-sec"><div class="dp-st">Axes de travail</div>'+axesHtml+'</div>':'')
-    +(m.concurrence?'<div class="dp-sec"><div class="dp-st">Analyse concurrence</div><div class="dp-text">'+m.concurrence+'</div></div>':'')
-    +(m.analyse_offre?'<div class="dp-sec"><div class="dp-st">Analyse de l offre</div><div class="dp-text">'+m.analyse_offre+'</div></div>':'')
-    +(m.propositions?'<div class="dp-sec"><div class="dp-st">Propositions & idees</div><div class="dp-text">'+m.propositions+'</div></div>':'')
-    +(m.actions_reseaux?'<div class="dp-sec"><div class="dp-st">Actions reseaux sociaux</div><div class="dp-text">'+m.actions_reseaux+'</div></div>':'')
-    +(m.notes?'<div class="dp-sec"><div class="dp-st">Notes</div><div class="dp-text">'+m.notes+'</div></div>':'');
-}
-
-function buildMissionForm(m){
-  var isNew=!m;
-  var axesVal=m?m.axes:[''];
-  var iconsHtml=ICONS.map(function(ic){return'<div class="icon-opt'+(m&&m.icon===ic?' selected':'')+'" onclick="selectIcon(this,\''+ic+'\')">'+ic+'</div>';}).join('');
-  return '<div class="mf-group"><label>Boutique / Nom de la mission *</label><input type="text" id="mf-boutique" value="'+(m?m.boutique:'')+'" placeholder="Ex: Galzin Palavas"/></div>'
-    +'<div class="mf-group"><label>Type / Categorie</label><input type="text" id="mf-type" value="'+(m?m.type_label:'')+'" placeholder="Ex: Concurrence, Offre restauration..."/></div>'
-    +'<div class="mf-group"><label>Icone</label><div class="icon-picker" id="icon-picker">'+iconsHtml+'</div><input type="hidden" id="mf-icon" value="'+(m?m.icon:'🎯')+'"/></div>'
-    +'<div class="mf-group"><label>Statut</label><select id="mf-statut">'+Object.keys(STATUS).map(function(k){return'<option value="'+k+'"'+(m&&m.statut===k?' selected':'')+'>'+STATUS[k]+'</option>';}).join('')+'</select></div>'
-    +'<div class="mf-group"><label>Problematique</label><textarea id="mf-problematique" placeholder="Decris la problematique ou l objectif principal...">'+(m?m.problematique:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Axes de travail</label><div class="axes-list" id="axes-list">'+axesVal.map(function(a,i){return axeRow(a,i);}).join('')+'</div><button class="add-axe-btn" onclick="addAxe()">+ Ajouter un axe</button></div>'
-    +'<div class="mf-group"><label>Analyse concurrence</label><textarea id="mf-concurrence" placeholder="Observations concurrents, prix, offres...">'+(m?m.concurrence:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Analyse de l offre</label><textarea id="mf-analyse" placeholder="Offre actuelle, points forts, manques...">'+(m?m.analyse_offre:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Propositions & idees</label><textarea id="mf-propositions" placeholder="Actions concretes a mettre en place...">'+(m?m.propositions:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Actions reseaux sociaux</label><textarea id="mf-reseaux" placeholder="Contenu a creer, stories, posts, TikTok...">'+(m?m.actions_reseaux:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Notes diverses</label><textarea id="mf-notes" placeholder="Autres observations...">'+(m?m.notes:'')+'</textarea></div>'
-    +'<button class="save-btn" onclick="saveMissionForm(\''+(!isNew?m.id:'')+'\')">Enregistrer</button>'
-    +(!isNew?'<button class="del-mission-btn" onclick="askDeleteMission(\''+m.id+'\',\''+m.boutique.replace(/'/g,"\\'")+'\')">\uD83D\uDDD1 Supprimer cette mission</button>':'');
-}
-
-function axeRow(val,i){return'<div class="axe-row" id="axe-'+i+'"><input type="text" value="'+val.replace(/"/g,'&quot;')+'" placeholder="Axe '+(i+1)+'..."/><button class="axe-del" onclick="removeAxe('+i+')">×</button></div>';}
-function addAxe(){var list=document.getElementById('axes-list');var i=list.children.length;list.insertAdjacentHTML('beforeend',axeRow('',i));}
-function removeAxe(i){var el=document.getElementById('axe-'+i);if(el)el.remove();reindexAxes();}
-function reindexAxes(){var rows=document.querySelectorAll('#axes-list .axe-row');rows.forEach(function(r,i){r.id='axe-'+i;var del=r.querySelector('.axe-del');if(del)del.setAttribute('onclick','removeAxe('+i+')')});}
-function selectIcon(el,icon){document.querySelectorAll('.icon-opt').forEach(function(o){o.classList.remove('selected');});el.classList.add('selected');document.getElementById('mf-icon').value=icon;}
-
-function saveMissionForm(id){
-  var boutique=document.getElementById('mf-boutique').value.trim();
-  if(!boutique){showToast('Saisis le nom de la boutique');return;}
-  var axes=[];document.querySelectorAll('#axes-list .axe-row input').forEach(function(inp){if(inp.value.trim())axes.push(inp.value.trim());});
-  var data={boutique:boutique,type_label:document.getElementById('mf-type').value||'Mission',icon:document.getElementById('mf-icon').value||'🎯',statut:document.getElementById('mf-statut').value,problematique:document.getElementById('mf-problematique').value,axes:axes,concurrence:document.getElementById('mf-concurrence').value,analyse_offre:document.getElementById('mf-analyse').value,propositions:document.getElementById('mf-propositions').value,actions_reseaux:document.getElementById('mf-reseaux').value,notes:document.getElementById('mf-notes').value};
-  if(id){
-    var m=missions.find(function(x){return x.id===id;});
-    if(m)Object.assign(m,data);
-  }else{
-    data.id='m'+Date.now();
-    missions.push(data);
-  }
-  saveMissions();closePanel('mp');renderMissions();showToast(id?'Mission mise a jour !':'Mission creee !');
-}
-
-function askDeleteMission(id,name){pendingMissionId=id;document.getElementById('mct').textContent='Supprimer la mission "'+name+'" ?';document.getElementById('mcov').classList.add('open');}
-function closeMC(){document.getElementById('mcov').classList.remove('open');pendingMissionId=null;}
-function doDeleteMission(){if(!pendingMissionId)return;missions=missions.filter(function(m){return m.id!==pendingMissionId;});saveMissions();closeMC();closePanel('mp');renderMissions();showToast('Mission supprimee');}
-
-/* AUDIT FORM */
+/* ===== AUDIT FORM ===== */
 function buildForm(){
   ratings={};var cont=document.getElementById('sc');cont.innerHTML='';
   CR.forEach(function(s,si){
@@ -400,7 +299,7 @@ function updateScore(){
   var vals=Object.values(ratings).filter(function(v){return v>0;});
   var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
   var cls=avg>=4?'go':avg>=3?'mi':avg>0?'ba':'';
-  document.getElementById('ls').innerHTML='<div class="sb"><div class="l">Score</div><div class="v '+cls+'">'+(avg>0?avg.toFixed(1)+'/5':'--')+'</div></div><div class="sb"><div class="l">Notes</div><div class="v">'+vals.length+'/'+Object.keys(ratings).length+'</div></div><div class="sb"><div class="l">Avancee</div><div class="v">'+Math.round(vals.length/Object.keys(ratings).length*100)+'%</div></div>';
+  document.getElementById('ls').innerHTML='<div class="sb"><div class="l">Score</div><div class="v '+cls+'">'+(avg>0?avg.toFixed(1)+'/5':'--')+'</div></div><div class="sb"><div class="l">Notes</div><div class="v">'+Object.values(ratings).filter(function(v){return v>0;}).length+'/'+Object.keys(ratings).length+'</div></div><div class="sb"><div class="l">Avancee</div><div class="v">'+Math.round(Object.values(ratings).filter(function(v){return v>0;}).length/Object.keys(ratings).length*100)+'%</div></div>';
 }
 async function submitAudit(){
   var name=document.getElementById('shopName').value.trim();if(!name){showToast('Saisis le nom de la boutique');return;}
@@ -414,68 +313,348 @@ async function submitAudit(){
 }
 function resetAudit(){['shopName','auditedBy','globalNote','actionsNote'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('auditDate').value=new Date().toISOString().split('T')[0];buildForm();}
 
-/* HISTORY */
+/* ===== HISTORY ===== */
 async function loadHistory(){
   var cont=document.getElementById('hc');cont.innerHTML='<div class="spinner"></div>';
-  try{var data=await api('GET','audits?order=date_audit.desc,created_at.desc');allAudits=data||[];
+  try{
+    var data=await api('GET','audits?order=date_audit.desc,created_at.desc');
+    allAudits=data||[];
     if(!allAudits.length){cont.innerHTML='<div class="empty">Aucun audit.<br>Lance ton premier audit !</div>';return;}
-    cont.innerHTML=allAudits.map(function(a){var sc=parseFloat(a.score_global);var bc=sc>=4?'gg':sc>=3?'ga':'gr';return'<div class="ai" onclick="openAudit('+a.id+')"><div class="ah"><div style="flex:1;min-width:0"><div class="an">'+a.boutique+'</div><div class="ad">'+(a.date_audit||'')+(a.audite_par?' · par '+a.audite_par:'')+'</div></div><span class="bg2 '+bc+'">'+sc+'/5</span><span style="font-size:18px;color:var(--mu);margin-left:4px">›</span></div></div>';}).join('');
+    cont.innerHTML='<div style="font-size:13px;color:var(--mu);margin-bottom:10px;font-weight:500">'+allAudits.length+' audit'+(allAudits.length>1?'s':'') +' — clique pour voir le detail</div>'
+      +allAudits.map(function(a){
+        var sc=parseFloat(a.score_global);
+        var bc=sc>=4?'gg':sc>=3?'ga':'gr';
+        var lbl=sc>=4?'Bon':sc>=3?'Moyen':'A ameliorer';
+        return '<div class="ai" onclick="openAudit('+a.id+')">'
+          +'<div class="ah">'
+          +'<div style="flex:1;min-width:0"><div class="an">'+a.boutique+'</div>'
+          +'<div class="ad">'+(a.date_audit||'')+(a.audite_par?' · par '+a.audite_par:'')+'</div></div>'
+          +'<span class="bg2 '+bc+'">'+sc+'/5 — '+lbl+'</span>'
+          +'<span style="font-size:20px;color:var(--mu);margin-left:6px;flex-shrink:0">›</span>'
+          +'</div></div>';
+      }).join('');
   }catch(e){cont.innerHTML='<div class="empty">Erreur de connexion</div>';}
 }
+
+/* ===== AUDIT DETAIL — fiche complete ===== */
 function openAudit(id){
-  var a=allAudits.find(function(x){return x.id===id;});if(!a)return;
-  var sc=parseFloat(a.score_global);var bc=sc>=4?'gg':sc>=3?'ga':'gr';var lbl=sc>=4?'Bon':sc>=3?'Moyen':'A ameliorer';var cls=sc>=4?'go':sc>=3?'mi':'ba';
-  document.getElementById('dp-title').textContent=a.boutique;document.getElementById('dp-badge').className='bg2 '+bc;document.getElementById('dp-badge').textContent=lbl;
-  var cats=[['Vitrine',a.vitrine],['Accueil',a.accueil],['Produits',a.produits],['Espace int.',a.espace_interieur],['Digital',a.digital]];
-  var bars=cats.filter(function(x){return x[1];}).map(function(x){var n=x[0],v=x[1],c=v>=4?'var(--g)':v>=3?'var(--a)':'var(--r)';return'<div class="br"><span class="bl2">'+n+'</span><div class="bt"><div class="bf" style="width:'+Math.round(v/5*100)+'%;background:'+c+'"></div></div><span class="bv">'+parseFloat(v).toFixed(1)+'</span></div>';}).join('');
-  var tags='';if(a.point_faible||a.point_fort){tags='<div class="dp-sec"><div class="dp-st">Points cles</div><div class="tag-row">'+(a.point_faible?'<span class="tag tw">Faible : '+a.point_faible+'</span>':'')+(a.point_fort?'<span class="tag ts">Fort : '+a.point_fort+'</span>':'')+'</div></div>';}
-  document.getElementById('dp-body').innerHTML='<div class="big-score"><div class="big-num v '+cls+'">'+sc+'<span style="font-size:24px;font-weight:400">/5</span></div><div class="big-lbl">Score global</div></div><div class="dp-meta">'+(a.date_audit||'')+(a.audite_par?' &nbsp;·&nbsp; par '+a.audite_par:'')+'</div>'+(bars?'<div class="dp-sec"><div class="dp-st">Scores par categorie</div>'+bars+'</div>':'')+tags+(a.observations?'<div class="dp-sec"><div class="dp-st">Observations</div><div class="dp-text">'+a.observations+'</div></div>':'')+(a.actions?'<div class="dp-sec"><div class="dp-st">Actions a mener</div><div class="dp-text">'+a.actions+'</div></div>':'')+'<button class="del-btn" onclick="askDel('+a.id+',\''+a.boutique.replace(/'/g,"\\'")+'\')">Supprimer cet audit</button>';
+  var a=allAudits.find(function(x){return x.id===id;});
+  if(!a){showToast('Donnees non chargees');return;}
+  var sc=parseFloat(a.score_global);
+  var bc=sc>=4?'gg':sc>=3?'ga':'gr';
+  var lbl=sc>=4?'Bon':sc>=3?'Moyen':'A ameliorer';
+  var cls=sc>=4?'go':sc>=3?'mi':'ba';
+  document.getElementById('dp-title').textContent=a.boutique;
+  document.getElementById('dp-badge').className='bg2 '+bc;
+  document.getElementById('dp-badge').textContent=lbl;
+
+  var cats=[
+    {n:'Vitrine & entree',v:a.vitrine},
+    {n:'Accueil & service',v:a.accueil},
+    {n:'Produits',v:a.produits},
+    {n:'Espace interieur',v:a.espace_interieur},
+    {n:'Digital & reseaux',v:a.digital}
+  ];
+  var barsHtml=cats.filter(function(c){return c.v&&c.v>0;}).map(function(c){
+    var col=c.v>=4?'var(--g)':c.v>=3?'var(--a)':'var(--r)';
+    return '<div class="br"><span class="bl2">'+c.n+'</span>'
+      +'<div class="bt"><div class="bf" style="width:'+Math.round(c.v/5*100)+'%;background:'+col+'"></div></div>'
+      +'<span class="bv">'+parseFloat(c.v).toFixed(1)+'</span></div>';
+  }).join('');
+
+  var tagsHtml='';
+  if(a.point_faible||a.point_fort){
+    tagsHtml='<div class="dp-sec"><div class="dp-st">Points cles</div><div class="tag-row">'
+      +(a.point_faible?'<span class="tag tw">⚠ Faible : '+a.point_faible+'</span>':'')
+      +(a.point_fort?'<span class="tag ts">✓ Fort : '+a.point_fort+'</span>':'')
+      +'</div></div>';
+  }
+
+  document.getElementById('dp-body').innerHTML=
+    '<div class="big-score">'
+    +'<div class="big-num v '+cls+'">'+sc+'<span style="font-size:28px;font-weight:400">/5</span></div>'
+    +'<div class="big-sub">Score global</div>'
+    +'</div>'
+    +'<div class="dp-meta">'
+    +(a.date_audit?'<span>📅 '+a.date_audit+'</span>':'')
+    +(a.audite_par?'<span>👤 '+a.audite_par+'</span>':'')
+    +'</div>'
+    +(barsHtml?'<div class="dp-sec"><div class="dp-st">Scores par categorie</div>'+barsHtml+'</div>':'')
+    +tagsHtml
+    +(a.observations?'<div class="dp-sec"><div class="dp-st">Observations generales</div><div class="dp-text">'+a.observations+'</div></div>':'')
+    +(a.actions?'<div class="dp-sec"><div class="dp-st">Actions a mener</div><div class="dp-text">'+a.actions+'</div></div>':'')
+    +'<button class="del-btn" onclick="askDel('+a.id+',\''+a.boutique.replace(/\'/g,"\\'")+'\')">'
+    +'🗑 Supprimer cet audit</button>';
+
   document.getElementById('dp').classList.add('open');
 }
-function askDel(id,name){pendingId=id;document.getElementById('ct').textContent='Supprimer l audit de "'+name+'" ?';document.getElementById('cov').classList.add('open');}
-function closeC(){document.getElementById('cov').classList.remove('open');pendingId=null;}
-async function doDelete(){if(!pendingId)return;var id=pendingId;closeC();closePanel('dp');try{await api('DELETE','audits?id=eq.'+id);showToast('Audit supprime');loadHistory();}catch(e){showToast('Erreur');}}
 
-/* STATS */
+function askDel(id,name){pendingId=id;document.getElementById('ct').textContent='Supprimer l audit de "'+name+'" ? Irreversible.';document.getElementById('cov').classList.add('open');}
+function closeC(){document.getElementById('cov').classList.remove('open');pendingId=null;}
+async function doDelete(){
+  if(!pendingId)return;var id=pendingId;closeC();closePanel('dp');
+  try{await api('DELETE','audits?id=eq.'+id);showToast('Audit supprime');loadHistory();}
+  catch(e){showToast('Erreur');}
+}
+
+/* ===== STATS AMELIOREES ===== */
 async function loadStats(){
   var cont=document.getElementById('stc');cont.innerHTML='<div class="spinner"></div>';
-  try{var data=await api('GET','audits?order=date_audit.desc,created_at.desc');allAudits=data||[];if(!allAudits.length){cont.innerHTML='<div class="empty">Aucune donnee</div>';return;}renderStats(allAudits);}
-  catch(e){cont.innerHTML='<div class="empty">Erreur de connexion</div>';}
+  try{
+    var data=await api('GET','audits?order=date_audit.asc,created_at.asc');
+    allAudits=data||[];
+    if(!allAudits.length){cont.innerHTML='<div class="empty">Aucune donnee</div>';return;}
+    buildStatsUI(allAudits);
+  }catch(e){cont.innerHTML='<div class="empty">Erreur de connexion</div>';}
 }
-function renderStats(data){
+
+function buildStatsUI(data){
   var cont=document.getElementById('stc');
   var shops=[...new Set(data.map(function(a){return a.boutique;}))].sort();
   var dates=data.map(function(a){return a.date_audit;}).filter(Boolean).sort();
-  cont.innerHTML='<div class="filter-bar"><select id="f-shop" onchange="applyFilter()"><option value="">Toutes les boutiques</option>'+shops.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')+'</select><input type="date" id="f-from" value="'+(dates[0]||'')+'" onchange="applyFilter()"/><input type="date" id="f-to" value="'+(dates[dates.length-1]||'')+'" onchange="applyFilter()"/></div><div id="stats-kpis"></div><div class="card" id="stats-bars"></div><div class="card" id="stats-cmp"></div>';
-  applyFilter();
+  var minD=dates[0]||'',maxD=dates[dates.length-1]||'';
+
+  cont.innerHTML=
+    '<div class="filter-tabs">'
+    +'<button class="ftab active" id="ftab-global" onclick="setStatsMode(\'global\')">Vue globale</button>'
+    +'<button class="ftab" id="ftab-boutique" onclick="setStatsMode(\'boutique\')">Par boutique</button>'
+    +'<button class="ftab" id="ftab-compare" onclick="setStatsMode(\'compare\')">Comparer</button>'
+    +'</div>'
+    +'<div class="filter-section">'
+    +'<div class="filter-row">'
+    +'<select id="f-shop1" onchange="applyStats()"><option value="">Toutes les boutiques</option>'+shops.map(function(s){return'<option>'+s+'</option>';}).join('')+'</select>'
+    +'</div>'
+    +'<div class="filter-row">'
+    +'<input type="date" id="f-from" value="'+minD+'" onchange="applyStats()"/>'
+    +'<input type="date" id="f-to" value="'+maxD+'" onchange="applyStats()"/>'
+    +'</div>'
+    +'<div id="compare-extra" style="display:none"><div class="filter-row">'
+    +'<select id="f-shop2" onchange="applyStats()"><option value="">2eme boutique</option>'+shops.map(function(s){return'<option>'+s+'</option>';}).join('')+'</select>'
+    +'</div></div>'
+    +'</div>'
+    +'<div id="stats-output"></div>';
+
+  statsMode='global';
+  applyStats();
 }
-function applyFilter(){
-  var shop=document.getElementById('f-shop').value;var from=document.getElementById('f-from').value;var to=document.getElementById('f-to').value;
-  var f=allAudits.filter(function(a){if(shop&&a.boutique!==shop)return false;if(from&&a.date_audit&&a.date_audit<from)return false;if(to&&a.date_audit&&a.date_audit>to)return false;return true;});
-  renderKpis(f);renderBars(f);renderCmp(f);
+
+function setStatsMode(mode){
+  statsMode=mode;
+  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('ftab-'+mode).classList.add('active');
+  var extra=document.getElementById('compare-extra');
+  if(extra)extra.style.display=mode==='compare'?'':'none';
+  applyStats();
 }
-function renderKpis(d){
-  if(!d.length){document.getElementById('stats-kpis').innerHTML='<div class="empty">Aucune donnee</div>';return;}
-  var sc=d.map(function(a){return parseFloat(a.score_global);}).filter(function(v){return!isNaN(v);});
-  var avg=sc.reduce(function(a,b){return a+b;},0)/sc.length;
+
+function applyStats(){
+  var shop1=document.getElementById('f-shop1')?document.getElementById('f-shop1').value:'';
+  var from=document.getElementById('f-from')?document.getElementById('f-from').value:'';
+  var to=document.getElementById('f-to')?document.getElementById('f-to').value:'';
+  var shop2El=document.getElementById('f-shop2');
+  var shop2=shop2El?shop2El.value:'';
+
+  var filtered=allAudits.filter(function(a){
+    if(shop1&&a.boutique!==shop1)return false;
+    if(from&&a.date_audit&&a.date_audit<from)return false;
+    if(to&&a.date_audit&&a.date_audit>to)return false;
+    return true;
+  });
+
+  var out=document.getElementById('stats-output');
+  if(!out)return;
+
+  if(statsMode==='compare'&&shop2){
+    var set1=allAudits.filter(function(a){return a.boutique===shop1&&(!from||a.date_audit>=from)&&(!to||a.date_audit<=to);});
+    var set2=allAudits.filter(function(a){return a.boutique===shop2&&(!from||a.date_audit>=from)&&(!to||a.date_audit<=to);});
+    out.innerHTML=renderCompareTwoBoutiques(shop1||'Boutique 1',set1,shop2,set2);
+  } else if(statsMode==='boutique'&&shop1){
+    out.innerHTML=renderSingleBoutique(shop1,filtered);
+  } else {
+    out.innerHTML=renderGlobal(filtered);
+  }
+}
+
+function avgArr(arr){return arr.length?arr.reduce(function(a,b){return a+b;},0)/arr.length:0;}
+
+function renderGlobal(d){
+  if(!d.length)return'<div class="empty">Aucune donnee pour ces filtres</div>';
+  var scores=d.map(function(a){return parseFloat(a.score_global);}).filter(function(v){return!isNaN(v);});
+  var avg=avgArr(scores);
   var best=d.slice().sort(function(a,b){return parseFloat(b.score_global)-parseFloat(a.score_global);})[0];
   var worst=d.slice().sort(function(a,b){return parseFloat(a.score_global)-parseFloat(b.score_global);})[0];
   var cls=avg>=4?'go':avg>=3?'mi':'ba';
-  document.getElementById('stats-kpis').innerHTML='<div class="kg"><div class="kpi"><div class="l">Audits</div><div class="v">'+d.length+'</div></div><div class="kpi"><div class="l">Moyenne</div><div class="v '+cls+'">'+avg.toFixed(1)+'/5</div></div><div class="kpi"><div class="l">Meilleure</div><div class="v" style="font-size:13px;margin-top:4px">'+best.boutique+'</div></div><div class="kpi"><div class="l">A surveiller</div><div class="v" style="font-size:13px;margin-top:4px">'+worst.boutique+'</div></div></div>';
-}
-function renderBars(d){
-  if(!d.length){document.getElementById('stats-bars').innerHTML='';return;}
-  var keys=['vitrine','accueil','produits','espace_interieur','digital'];var names=['Vitrine','Accueil','Produits','Espace int.','Digital'];
-  var ca=keys.map(function(k){var vs=d.map(function(a){return parseFloat(a[k]);}).filter(function(v){return!isNaN(v)&&v>0;});return vs.length?vs.reduce(function(a,b){return a+b;},0)/vs.length:0;});
-  document.getElementById('stats-bars').innerHTML='<div class="sh">Scores par categorie</div>'+names.map(function(n,i){return'<div class="br"><span class="bl2">'+n+'</span><div class="bt"><div class="bf" style="width:'+(ca[i]>0?Math.round(ca[i]/5*100):0)+'%;background:'+(ca[i]>=4?'var(--g)':ca[i]>=3?'var(--a)':'var(--r)')+'"></div></div><span class="bv">'+(ca[i]>0?ca[i].toFixed(1):'--')+'</span></div>';}).join('');
-}
-function renderCmp(d){
-  if(!d.length){document.getElementById('stats-cmp').innerHTML='';return;}
-  var map={};d.forEach(function(a){if(!map[a.boutique])map[a.boutique]={name:a.boutique,scores:[],count:0};map[a.boutique].scores.push(parseFloat(a.score_global));map[a.boutique].count++;});
-  var rows=Object.values(map).map(function(b){var avg=b.scores.reduce(function(a,c){return a+c;},0)/b.scores.length;return{name:b.name,avg:avg,count:b.count};}).sort(function(a,b){return b.avg-a.avg;});
-  document.getElementById('stats-cmp').innerHTML='<div class="sh">Comparaison boutiques</div><table class="cmp-table"><thead><tr><th>Boutique</th><th>Audits</th><th>Moy.</th><th>Statut</th></tr></thead><tbody>'+rows.map(function(r){var cls=r.avg>=4?'go':r.avg>=3?'mi':'ba';var bc=r.avg>=4?'gg':r.avg>=3?'ga':'gr';return'<tr><td style="font-weight:500">'+r.name+'</td><td style="color:var(--mu)">'+r.count+'</td><td><span class="v '+cls+'" style="font-size:14px">'+r.avg.toFixed(1)+'</span></td><td><span class="bg2 '+bc+'">'+(r.avg>=4?'Bon':r.avg>=3?'Moyen':'A ameliorer')+'</span></td></tr>';}).join('')+'</tbody></table>';
+  var keys=['vitrine','accueil','produits','espace_interieur','digital'];
+  var names=['Vitrine','Accueil','Produits','Espace int.','Digital'];
+  var ca=keys.map(function(k){var vs=d.map(function(a){return parseFloat(a[k]);}).filter(function(v){return!isNaN(v)&&v>0;});return avgArr(vs);});
+  var map={};d.forEach(function(a){if(!map[a.boutique])map[a.boutique]={scores:[]};map[a.boutique].scores.push(parseFloat(a.score_global));});
+  var rows=Object.keys(map).map(function(n){return{name:n,avg:avgArr(map[n].scores),count:map[n].scores.length};}).sort(function(a,b){return b.avg-a.avg;});
+  return '<div class="kg">'
+    +'<div class="kpi"><div class="l">Audits</div><div class="v">'+d.length+'</div></div>'
+    +'<div class="kpi"><div class="l">Moyenne reseau</div><div class="v '+cls+'">'+avg.toFixed(1)+'/5</div></div>'
+    +'<div class="kpi"><div class="l">Meilleure boutique</div><div class="v" style="font-size:13px;margin-top:4px">'+best.boutique+'</div></div>'
+    +'<div class="kpi"><div class="l">A surveiller</div><div class="v" style="font-size:13px;margin-top:4px">'+worst.boutique+'</div></div>'
+    +'</div>'
+    +'<div class="card"><div class="sh">Scores par categorie</div>'
+    +names.map(function(n,i){var c=ca[i]>=4?'var(--g)':ca[i]>=3?'var(--a)':'var(--r)';return'<div class="br"><span class="bl2">'+n+'</span><div class="bt"><div class="bf" style="width:'+(ca[i]>0?Math.round(ca[i]/5*100):0)+'%;background:'+c+'"></div></div><span class="bv">'+(ca[i]>0?ca[i].toFixed(1):'--')+'</span></div>';}).join('')
+    +'</div>'
+    +'<div class="card"><div class="sh">Classement boutiques</div>'
+    +'<table class="cmp-table"><thead><tr><th>Boutique</th><th>Audits</th><th>Moy.</th><th>Statut</th></tr></thead><tbody>'
+    +rows.map(function(r){var cl=r.avg>=4?'go':r.avg>=3?'mi':'ba';var bc=r.avg>=4?'gg':r.avg>=3?'ga':'gr';return'<tr><td style="font-weight:500">'+r.name+'</td><td style="color:var(--mu)">'+r.count+'</td><td><span class="v '+cl+'" style="font-size:14px">'+r.avg.toFixed(1)+'</span></td><td><span class="bg2 '+bc+'">'+(r.avg>=4?'Bon':r.avg>=3?'Moyen':'A ameliorer')+'</span></td></tr>';}).join('')
+    +'</tbody></table></div>';
 }
 
+function renderSingleBoutique(name,d){
+  if(!d.length)return'<div class="empty">Aucun audit pour cette boutique</div>';
+  var scores=d.map(function(a){return parseFloat(a.score_global);}).filter(function(v){return!isNaN(v);});
+  var avg=avgArr(scores);
+  var cls=avg>=4?'go':avg>=3?'mi':'ba';
+  var keys=['vitrine','accueil','produits','espace_interieur','digital'];
+  var names=['Vitrine','Accueil','Produits','Espace int.','Digital'];
+  var ca=keys.map(function(k){var vs=d.map(function(a){return parseFloat(a[k]);}).filter(function(v){return!isNaN(v)&&v>0;});return avgArr(vs);});
+  var evolution=d.map(function(a){var sc=parseFloat(a.score_global);var cl=sc>=4?'go':sc>=3?'mi':'ba';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg)"><span style="font-size:13px;color:var(--mu);width:90px;flex-shrink:0">'+(a.date_audit||'--')+'</span><div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;background:'+(sc>=4?'var(--g)':sc>=3?'var(--a)':'var(--r)')+';width:'+Math.round(sc/5*100)+'%"></div></div><span class="v '+cl+'" style="font-size:14px;width:36px;text-align:right">'+sc+'</span></div>';}).join('');
+  return'<div class="kg">'
+    +'<div class="kpi"><div class="l">Audits</div><div class="v">'+d.length+'</div></div>'
+    +'<div class="kpi"><div class="l">Moyenne</div><div class="v '+cls+'">'+avg.toFixed(1)+'/5</div></div>'
+    +'</div>'
+    +'<div class="card"><div class="sh">Scores par categorie</div>'
+    +names.map(function(n,i){var c=ca[i]>=4?'var(--g)':ca[i]>=3?'var(--a)':'var(--r)';return'<div class="br"><span class="bl2">'+n+'</span><div class="bt"><div class="bf" style="width:'+(ca[i]>0?Math.round(ca[i]/5*100):0)+'%;background:'+c+'"></div></div><span class="bv">'+(ca[i]>0?ca[i].toFixed(1):'--')+'</span></div>';}).join('')
+    +'</div>'
+    +'<div class="card"><div class="sh">Evolution dans le temps</div>'+evolution+'</div>';
+}
+
+function renderCompareTwoBoutiques(n1,d1,n2,d2){
+  if(!d1.length&&!d2.length)return'<div class="empty">Aucune donnee pour ces boutiques</div>';
+  var keys=['vitrine','accueil','produits','espace_interieur','digital'];
+  var labels=['Vitrine','Accueil','Produits','Espace int.','Digital'];
+  function boutiqStats(d){
+    var scores=d.map(function(a){return parseFloat(a.score_global);}).filter(function(v){return!isNaN(v);});
+    var avg=avgArr(scores);
+    var ca=keys.map(function(k){var vs=d.map(function(a){return parseFloat(a[k]);}).filter(function(v){return!isNaN(v)&&v>0;});return avgArr(vs);});
+    return{avg:avg,ca:ca,count:d.length};
+  }
+  var s1=boutiqStats(d1),s2=boutiqStats(d2);
+  var c1=s1.avg>=4?'var(--g)':s1.avg>=3?'var(--a)':'var(--r)';
+  var c2=s2.avg>=4?'var(--g)':s2.avg>=3?'var(--a)':'var(--r)';
+
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+    +'<div class="kpi"><div class="l">'+n1+'</div><div class="v" style="color:'+c1+'">'+s1.avg.toFixed(1)+'/5</div><div style="font-size:11px;color:var(--mu)">'+s1.count+' audit(s)</div></div>'
+    +'<div class="kpi"><div class="l">'+n2+'</div><div class="v" style="color:'+c2+'">'+s2.avg.toFixed(1)+'/5</div><div style="font-size:11px;color:var(--mu)">'+s2.count+' audit(s)</div></div>'
+    +'</div>';
+
+  html+='<div class="card"><div class="sh">Comparaison par categorie</div>';
+  labels.forEach(function(lbl,i){
+    var v1=s1.ca[i],v2=s2.ca[i];
+    var col1=v1>=4?'var(--g)':v1>=3?'var(--a)':'var(--r)';
+    var col2=v2>=4?'var(--g)':v2>=3?'var(--a)':'var(--r)';
+    var winner=v1>v2?'← '+n1:v2>v1?n2+' →':'Egalite';
+    html+='<div style="margin-bottom:14px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<span style="font-size:13px;font-weight:600">'+lbl+'</span>'
+      +'<span style="font-size:11px;color:var(--mu)">'+winner+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      +'<span style="font-size:11px;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)">'+n1+'</span>'
+      +'<div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;background:'+col1+';width:'+Math.round(v1/5*100)+'%"></div></div>'
+      +'<span style="font-size:12px;font-weight:600;width:26px;text-align:right;color:var(--mu)">'+(v1>0?v1.toFixed(1):'--')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<span style="font-size:11px;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)">'+n2+'</span>'
+      +'<div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;background:'+col2+';width:'+Math.round(v2/5*100)+'%"></div></div>'
+      +'<span style="font-size:12px;font-weight:600;width:26px;text-align:right;color:var(--mu)">'+(v2>0?v2.toFixed(1):'--')+'</span>'
+      +'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+/* ===== MISSIONS ===== */
+function loadMissions(){
+  var saved=localStorage.getItem('galzin_missions_v2');
+  missions=saved?JSON.parse(saved):JSON.parse(JSON.stringify(MISSIONS_DEFAULT));
+  renderMissions();
+}
+function saveMissions(){localStorage.setItem('galzin_missions_v2',JSON.stringify(missions));}
+function renderMissions(){
+  var order=['urgent','wip','todo','done'];
+  var sorted=missions.slice().sort(function(a,b){return order.indexOf(a.statut)-order.indexOf(b.statut);});
+  document.getElementById('missions-count').textContent=missions.length+' mission'+(missions.length>1?'s':'');
+  document.getElementById('missions-list').innerHTML=sorted.length?sorted.map(function(m){
+    return'<div class="mc"><div class="mc-header" onclick="openMission(\''+m.id+'\')"><div class="mc-icon">'+m.icon+'</div><div class="mc-info"><div class="mc-name">'+m.boutique+'</div><div class="mc-type">'+m.type_label+'</div></div><span class="sp '+STATUS_CLS[m.statut]+'">'+STATUS[m.statut]+'</span><span style="font-size:18px;color:var(--mu);margin-left:6px">›</span></div></div>';
+  }).join(''):'<div class="empty">Aucune mission.<br>Appuie sur "+ Nouvelle mission" !</div>';
+}
+function newMission(){
+  currentMissionId=null;editingMission=true;
+  document.getElementById('mp-title').textContent='Nouvelle mission';
+  document.getElementById('mp-edit-toggle').style.display='none';
+  document.getElementById('mp-body').innerHTML=buildMissionForm(null);
+  document.getElementById('mp').classList.add('open');
+}
+function openMission(id){
+  currentMissionId=id;editingMission=false;
+  var m=missions.find(function(x){return x.id===id;});if(!m)return;
+  document.getElementById('mp-title').textContent=m.boutique;
+  document.getElementById('mp-edit-toggle').textContent='Modifier';
+  document.getElementById('mp-edit-toggle').style.display='';
+  renderMissionView(m);
+  document.getElementById('mp').classList.add('open');
+}
+function toggleMissionEdit(){
+  editingMission=!editingMission;
+  var m=missions.find(function(x){return x.id===currentMissionId;});if(!m)return;
+  document.getElementById('mp-edit-toggle').textContent=editingMission?'Annuler':'Modifier';
+  if(editingMission){document.getElementById('mp-body').innerHTML=buildMissionForm(m);}
+  else{renderMissionView(m);}
+}
+function renderMissionView(m){
+  var axesHtml=m.axes.map(function(a,i){return'<div style="display:flex;gap:10px;margin-bottom:8px;font-size:14px"><span style="color:var(--g);font-weight:700;flex-shrink:0">'+(i+1)+'.</span><span>'+a+'</span></div>';}).join('');
+  document.getElementById('mp-body').innerHTML=
+    '<div style="margin-bottom:16px"><span class="sp '+STATUS_CLS[m.statut]+'" style="font-size:13px;padding:6px 14px">'+STATUS[m.statut]+'</span></div>'
+    +(m.problematique?'<div class="dp-sec"><div class="dp-sec-view">Problematique</div><div class="dp-text">'+m.problematique+'</div></div>':'')
+    +(m.axes.length?'<div class="dp-sec"><div class="dp-sec-view">Axes de travail</div>'+axesHtml+'</div>':'')
+    +(m.concurrence?'<div class="dp-sec"><div class="dp-sec-view">Analyse concurrence</div><div class="dp-text">'+m.concurrence+'</div></div>':'')
+    +(m.analyse_offre?'<div class="dp-sec"><div class="dp-sec-view">Analyse de l offre</div><div class="dp-text">'+m.analyse_offre+'</div></div>':'')
+    +(m.propositions?'<div class="dp-sec"><div class="dp-sec-view">Propositions & idees</div><div class="dp-text">'+m.propositions+'</div></div>':'')
+    +(m.actions_reseaux?'<div class="dp-sec"><div class="dp-sec-view">Actions reseaux sociaux</div><div class="dp-text">'+m.actions_reseaux+'</div></div>':'')
+    +(m.notes?'<div class="dp-sec"><div class="dp-sec-view">Notes</div><div class="dp-text">'+m.notes+'</div></div>':'');
+}
+function buildMissionForm(m){
+  var isNew=!m;
+  var axesVal=m?m.axes:[''];
+  var iconsHtml=ICONS.map(function(ic){return'<div class="icon-opt'+(m&&m.icon===ic?' selected':'')+"\" onclick=\"selectIcon(this,'"+ic+"')\">"+ic+'</div>';}).join('');
+  return '<div class="mf-group"><label>Boutique / Nom *</label><input type="text" id="mf-boutique" value="'+(m?m.boutique:'')+'" placeholder="Ex: Galzin Palavas"/></div>'
+    +'<div class="mf-group"><label>Type / Categorie</label><input type="text" id="mf-type" value="'+(m?m.type_label:'')+'" placeholder="Ex: Concurrence, Offre restauration..."/></div>'
+    +'<div class="mf-group"><label>Icone</label><div class="icon-picker">'+iconsHtml+'</div><input type="hidden" id="mf-icon" value="'+(m?m.icon:'🎯')+'"/></div>'
+    +'<div class="mf-group"><label>Statut</label><select id="mf-statut">'+Object.keys(STATUS).map(function(k){return'<option value="'+k+'"'+(m&&m.statut===k?' selected':'')+'>'+STATUS[k]+'</option>';}).join('')+'</select></div>'
+    +'<div class="mf-group"><label>Problematique</label><textarea id="mf-problematique" placeholder="Decris l objectif principal...">'+(m?m.problematique:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Axes de travail</label><div class="axes-list" id="axes-list">'+axesVal.map(function(a,i){return axeRow(a,i);}).join('')+'</div><button class="add-axe-btn" onclick="addAxe()">+ Ajouter un axe</button></div>'
+    +'<div class="mf-group"><label>Analyse concurrence</label><textarea id="mf-concurrence" placeholder="Observations concurrents...">'+(m?m.concurrence:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Analyse de l offre</label><textarea id="mf-analyse" placeholder="Offre actuelle, points forts...">'+(m?m.analyse_offre:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Propositions & idees</label><textarea id="mf-propositions" placeholder="Actions concretes...">'+(m?m.propositions:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Actions reseaux sociaux</label><textarea id="mf-reseaux" placeholder="Contenu, stories, TikTok...">'+(m?m.actions_reseaux:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Notes diverses</label><textarea id="mf-notes" placeholder="Autres observations...">'+(m?m.notes:'')+'</textarea></div>'
+    +'<button class="save-btn" onclick="saveMissionForm(\''+(isNew?'':m.id)+'\')">Enregistrer</button>'
+    +(!isNew?'<button class="del-mission-btn" onclick="askDeleteMission(\''+m.id+'\',\''+m.boutique.replace(/\'/g,"\\'")+'\')">🗑 Supprimer cette mission</button>':'');
+}
+function axeRow(val,i){return'<div class="axe-row" id="axe-'+i+'"><input type="text" value="'+val.replace(/"/g,'&quot;')+'" placeholder="Axe '+(i+1)+'..."/><button class="axe-del" onclick="removeAxe('+i+')">×</button></div>';}
+function addAxe(){var list=document.getElementById('axes-list');var i=list.children.length;list.insertAdjacentHTML('beforeend',axeRow('',i));}
+function removeAxe(i){var el=document.getElementById('axe-'+i);if(el)el.remove();reindexAxes();}
+function reindexAxes(){document.querySelectorAll('#axes-list .axe-row').forEach(function(r,i){r.id='axe-'+i;var d=r.querySelector('.axe-del');if(d)d.setAttribute('onclick','removeAxe('+i+')')});}
+function selectIcon(el,icon){document.querySelectorAll('.icon-opt').forEach(function(o){o.classList.remove('selected');});el.classList.add('selected');document.getElementById('mf-icon').value=icon;}
+function saveMissionForm(id){
+  var boutique=document.getElementById('mf-boutique').value.trim();if(!boutique){showToast('Saisis le nom');return;}
+  var axes=[];document.querySelectorAll('#axes-list .axe-row input').forEach(function(inp){if(inp.value.trim())axes.push(inp.value.trim());});
+  var data={boutique:boutique,type_label:document.getElementById('mf-type').value||'Mission',icon:document.getElementById('mf-icon').value||'🎯',statut:document.getElementById('mf-statut').value,problematique:document.getElementById('mf-problematique').value,axes:axes,concurrence:document.getElementById('mf-concurrence').value,analyse_offre:document.getElementById('mf-analyse').value,propositions:document.getElementById('mf-propositions').value,actions_reseaux:document.getElementById('mf-reseaux').value,notes:document.getElementById('mf-notes').value};
+  if(id){var m=missions.find(function(x){return x.id===id;});if(m)Object.assign(m,data);}
+  else{data.id='m'+Date.now();missions.push(data);}
+  saveMissions();closePanel('mp');renderMissions();showToast(id?'Mission mise a jour !':'Mission creee !');
+}
+function askDeleteMission(id,name){pendingMissionId=id;document.getElementById('mct').textContent='Supprimer "'+name+'" ?';document.getElementById('mcov').classList.add('open');}
+function closeMC(){document.getElementById('mcov').classList.remove('open');pendingMissionId=null;}
+function doDeleteMission(){if(!pendingMissionId)return;missions=missions.filter(function(m){return m.id!==pendingMissionId;});saveMissions();closeMC();closePanel('mp');renderMissions();showToast('Mission supprimee');}
+
+/* ===== UTILS ===== */
 function closePanel(id){document.getElementById(id).classList.remove('open');}
 function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});document.getElementById('page-'+n).classList.add('active');btn.classList.add('active');if(n==='history')loadHistory();if(n==='stats')loadStats();if(n==='missions')loadMissions();}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
