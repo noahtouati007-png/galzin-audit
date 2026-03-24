@@ -241,7 +241,7 @@ textarea{min-height:80px;resize:vertical}
 <div id="screen-home">
   <div class="home-logo">G</div>
   <div class="home-title">Boulangeries Galzin</div>
-  <div class="home-sub">Outil analyse interne <br>des points de vente</div>
+  <div class="home-sub">Outil d audit qualite<br>des points de vente</div>
   <button class="home-btn home-btn-public" onclick="goManager()">
     📋 Remplir un audit
   </button>
@@ -259,7 +259,8 @@ textarea{min-height:80px;resize:vertical}
 
 <!-- ===== ECRAN MANAGER (public) ===== -->
 <div id="screen-manager">
-  <div class="mgr-header">
+  <div class="mgr-header" style="position:relative">
+    <button onclick="goHome()" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">&#8592; Retour</button>
     <div class="logo-big">G</div>
     <h2>Audit Qualite</h2>
     <p>Merci de remplir ce formulaire apres votre visite</p>
@@ -390,7 +391,7 @@ function setOff(){var d=document.getElementById('sd');if(d)d.className='dot';var
 function buildManagerForm(){
   mgrRatings={};
   var cont=document.getElementById('mgr-form-content');
-  var html='<div class="card"><div class="fr"><label>Nom de la boutique *</label><input type="text" id="mgr-boutique" placeholder="Ex: Galzin Palavas"/></div>'
+  var html='<div class="card"><div class="fr"><label>Nom de la boutique *</label><select id="mgr-boutique" style="font-size:15px"><option value="">-- Choisir une boutique --</option><option value="SARL GALZIN MILLAU MOULIN">SARL GALZIN MILLAU MOULIN</option><option value="SARL GALZIN MILLAU PLR">SARL GALZIN MILLAU PLR</option><option value="SARL GALZIN MILLAU TINE">SARL GALZIN MILLAU TINE</option><option value="SARL GALZIN MILLAU BONALD">SARL GALZIN MILLAU BONALD</option><option value="SARL GALZIN SUD SEMAILLES">SARL GALZIN SUD SEMAILLES</option><option value="SARL GALZIN SUD BALARUC">SARL GALZIN SUD BALARUC</option><option value="SARL GALZIN LANGUEDOC POMPIGNANE">SARL GALZIN LANGUEDOC POMPIGNANE</option><option value="SARL GALZIN LITTORAL PALAVAS">SARL GALZIN LITTORAL PALAVAS</option><option value="SARL GALZIN BAILLARGUES">SARL GALZIN BAILLARGUES</option><option value="SARL GALZIN LITTORAL PEROLS">SARL GALZIN LITTORAL PEROLS</option><option value="SARL GALZIN LANGUEDOC LATTES">SARL GALZIN LANGUEDOC LATTES</option><option value="SARL GALZIN LANGUEDOC CARNON">SARL GALZIN LANGUEDOC CARNON</option><option value="SARL GALZIN SUD ST JEAN">SARL GALZIN SUD ST JEAN</option><option value="SARL LE FOURNIL DE LA GINESTE RODEZ">SARL LE FOURNIL DE LA GINESTE RODEZ</option><option value="SARL GALZIN MILLAU PEUGEOT">SARL GALZIN MILLAU PEUGEOT</option><option value="SARL GALZIN LANGUEDOC SORIECH">SARL GALZIN LANGUEDOC SORIECH</option><option value="SARL GALZIN LANGUEDOC ST ELOI">SARL GALZIN LANGUEDOC ST ELOI</option><option value="SARL GALZIN CASTELNAU LE LEZ">SARL GALZIN CASTELNAU LE LEZ</option><option value="SARL GALZIN MILLAU EMMA">SARL GALZIN MILLAU EMMA</option><option value="SARL LE FOURNIL DE LA GINESTE - BARAQUEVILLE">SARL LE FOURNIL DE LA GINESTE - BARAQUEVILLE</option><option value="SARL LE FOURNIL DE PIGNAN">SARL LE FOURNIL DE PIGNAN</option><option value="SARL GALZIN CANDILLARGUES">SARL GALZIN CANDILLARGUES</option><option value="SARL GALZIN SUD MAURIN">SARL GALZIN SUD MAURIN</option><option value="SARL GALZIN SUD - PLATEFORME">SARL GALZIN SUD - PLATEFORME</option><option value="SARL LE FOURNIL DE ST AFFRIQUE - VERDUN">SARL LE FOURNIL DE ST AFFRIQUE - VERDUN</option><option value="SARL GALZIN SUD GARE ST ROCH">SARL GALZIN SUD GARE ST ROCH</option><option value="SARL GALZIN LANGUEDOC PORT MARIANNE">SARL GALZIN LANGUEDOC PORT MARIANNE</option><option value="SARL GALZIN THAU POUSSAN">SARL GALZIN THAU POUSSAN</option><option value="SARL LE FOURNIL DE LA GINESTE PRIMAUBE">SARL LE FOURNIL DE LA GINESTE PRIMAUBE</option><option value="SARL GALZIN LANGUEDOC - EUGENE ET MARIE">SARL GALZIN LANGUEDOC - EUGENE ET MARIE</option><option value="SARL GALZIN LITTORAL - PALAVES QUAI">SARL GALZIN LITTORAL - PALAVES QUAI</option><option value="SARL LE FOURNIL DE SAINT AFFRIQUE - BOREL">SARL LE FOURNIL DE SAINT AFFRIQUE - BOREL</option><option value="SARL GALZIN SUD - SABINES">SARL GALZIN SUD - SABINES</option><option value="GALZIN CENTRAL">GALZIN CENTRAL</option></select></div>'
     +'<div class="fg"><div><label>Date</label><input type="date" id="mgr-date" value="'+new Date().toISOString().split('T')[0]+'"/></div>'
     +'<div><label>Votre nom</label><input type="text" id="mgr-name" placeholder="Prenom"/></div></div></div>';
 
@@ -583,7 +584,7 @@ function renderAuditEdit(a){
   }).join('');
   document.getElementById('dp-body').innerHTML=
     '<div class="detail-sec"><div class="detail-sec-title">Informations</div>'
-    +'<div class="edit-field"><label>Boutique</label><input type="text" id="e-boutique" value="'+a.boutique+'"/></div>'
+    +'<div class="edit-field"><label>Boutique</label><select id="e-boutique" style="font-size:14px"><option value="">-- Choisir --</option><option value="SARL GALZIN MILLAU MOULIN">SARL GALZIN MILLAU MOULIN</option><option value="SARL GALZIN MILLAU PLR">SARL GALZIN MILLAU PLR</option><option value="SARL GALZIN MILLAU TINE">SARL GALZIN MILLAU TINE</option><option value="SARL GALZIN MILLAU BONALD">SARL GALZIN MILLAU BONALD</option><option value="SARL GALZIN SUD SEMAILLES">SARL GALZIN SUD SEMAILLES</option><option value="SARL GALZIN SUD BALARUC">SARL GALZIN SUD BALARUC</option><option value="SARL GALZIN LANGUEDOC POMPIGNANE">SARL GALZIN LANGUEDOC POMPIGNANE</option><option value="SARL GALZIN LITTORAL PALAVAS">SARL GALZIN LITTORAL PALAVAS</option><option value="SARL GALZIN BAILLARGUES">SARL GALZIN BAILLARGUES</option><option value="SARL GALZIN LITTORAL PEROLS">SARL GALZIN LITTORAL PEROLS</option><option value="SARL GALZIN LANGUEDOC LATTES">SARL GALZIN LANGUEDOC LATTES</option><option value="SARL GALZIN LANGUEDOC CARNON">SARL GALZIN LANGUEDOC CARNON</option><option value="SARL GALZIN SUD ST JEAN">SARL GALZIN SUD ST JEAN</option><option value="SARL LE FOURNIL DE LA GINESTE RODEZ">SARL LE FOURNIL DE LA GINESTE RODEZ</option><option value="SARL GALZIN MILLAU PEUGEOT">SARL GALZIN MILLAU PEUGEOT</option><option value="SARL GALZIN LANGUEDOC SORIECH">SARL GALZIN LANGUEDOC SORIECH</option><option value="SARL GALZIN LANGUEDOC ST ELOI">SARL GALZIN LANGUEDOC ST ELOI</option><option value="SARL GALZIN CASTELNAU LE LEZ">SARL GALZIN CASTELNAU LE LEZ</option><option value="SARL GALZIN MILLAU EMMA">SARL GALZIN MILLAU EMMA</option><option value="SARL LE FOURNIL DE LA GINESTE - BARAQUEVILLE">SARL LE FOURNIL DE LA GINESTE - BARAQUEVILLE</option><option value="SARL LE FOURNIL DE PIGNAN">SARL LE FOURNIL DE PIGNAN</option><option value="SARL GALZIN CANDILLARGUES">SARL GALZIN CANDILLARGUES</option><option value="SARL GALZIN SUD MAURIN">SARL GALZIN SUD MAURIN</option><option value="SARL GALZIN SUD - PLATEFORME">SARL GALZIN SUD - PLATEFORME</option><option value="SARL LE FOURNIL DE ST AFFRIQUE - VERDUN">SARL LE FOURNIL DE ST AFFRIQUE - VERDUN</option><option value="SARL GALZIN SUD GARE ST ROCH">SARL GALZIN SUD GARE ST ROCH</option><option value="SARL GALZIN LANGUEDOC PORT MARIANNE">SARL GALZIN LANGUEDOC PORT MARIANNE</option><option value="SARL GALZIN THAU POUSSAN">SARL GALZIN THAU POUSSAN</option><option value="SARL LE FOURNIL DE LA GINESTE PRIMAUBE">SARL LE FOURNIL DE LA GINESTE PRIMAUBE</option><option value="SARL GALZIN LANGUEDOC - EUGENE ET MARIE">SARL GALZIN LANGUEDOC - EUGENE ET MARIE</option><option value="SARL GALZIN LITTORAL - PALAVES QUAI">SARL GALZIN LITTORAL - PALAVES QUAI</option><option value="SARL LE FOURNIL DE SAINT AFFRIQUE - BOREL">SARL LE FOURNIL DE SAINT AFFRIQUE - BOREL</option><option value="SARL GALZIN SUD - SABINES">SARL GALZIN SUD - SABINES</option><option value="GALZIN CENTRAL">GALZIN CENTRAL</option></select>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +'<div class="edit-field"><label>Date</label><input type="date" id="e-date" value="'+(a.date_audit||'')+'"/></div>'
     +'<div class="edit-field"><label>Audite par</label><input type="text" id="e-auditeur" value="'+(a.audite_par||'')+'"/></div>'
@@ -595,6 +596,8 @@ function renderAuditEdit(a){
     +'</div>'
     +'<button class="save-edit-btn" onclick="saveAuditEdit(\''+a.id+'\')">Enregistrer les modifications</button>'
     +'<button class="del-btn" onclick="askDel(\''+a.id+'\',\''+a.boutique.replace(/\'/g,"\\'")+'\')">🗑 Supprimer cet audit</button>';
+  // Set select to current boutique value
+  var sel=document.getElementById('e-boutique');if(sel)sel.value=a.boutique;
 }
 
 function rateEdit(si,val){
