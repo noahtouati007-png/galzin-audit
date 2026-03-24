@@ -10,7 +10,27 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--g:#1D9E75;--gd:#0F6E56;--gl:#EAF3DE;--a:#EF9F27;--al:#FAEEDA;--r:#E24B4A;--rl:#FCEBEB;--b:#185FA5;--bl:#E6F1FB;--bg:#f5f4f0;--bd:#e0dfd7;--tx:#1a1a18;--mu:#888}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding-bottom:80px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* ===== LOGIN / ACCUEIL ===== */
+#screen-home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;background:var(--bg)}
+.home-logo{width:72px;height:72px;background:var(--g);border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:28px;margin-bottom:20px;box-shadow:0 4px 20px rgba(29,158,117,.25)}
+.home-title{font-size:22px;font-weight:700;margin-bottom:6px;text-align:center}
+.home-sub{font-size:14px;color:var(--mu);margin-bottom:36px;text-align:center;line-height:1.5}
+.home-btn{width:100%;max-width:320px;padding:15px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:12px;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.home-btn-public{background:var(--g);color:#fff}
+.home-btn-public:active{transform:scale(.98);background:var(--gd)}
+.home-btn-private{background:#fff;color:var(--tx);border:1.5px solid var(--bd)}
+.home-btn-private:active{transform:scale(.98)}
+.pwd-box{width:100%;max-width:320px;margin-top:4px;display:none}
+.pwd-row{display:flex;gap:8px;margin-top:8px}
+.pwd-row input{flex:1;padding:12px 14px;border:1.5px solid var(--bd);border-radius:10px;font-size:16px;font-family:inherit;background:#fff;color:var(--tx);letter-spacing:2px}
+.pwd-row input:focus{outline:none;border-color:var(--g)}
+.pwd-submit{padding:12px 20px;background:var(--g);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+.pwd-error{font-size:13px;color:var(--r);margin-top:8px;text-align:center;display:none}
+
+/* ===== APP SHELL ===== */
+#app{display:none;padding-bottom:80px}
 header{background:#fff;border-bottom:1px solid var(--bd);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
 .logo{width:38px;height:38px;background:var(--g);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0}
 header h1{font-size:17px;font-weight:600}
@@ -18,10 +38,21 @@ header p{font-size:12px;color:var(--mu)}
 .dot{width:8px;height:8px;border-radius:50%;background:#ccc;margin-left:auto;flex-shrink:0}
 .dot.on{background:var(--g)}.dot.sy{background:var(--a);animation:pu 1s infinite}
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+.logout-btn{font-size:12px;color:var(--mu);background:none;border:1px solid var(--bd);border-radius:6px;padding:4px 10px;cursor:pointer;margin-left:auto;flex-shrink:0}
 nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bd);display:flex;z-index:100}
 .nb{flex:1;padding:10px 2px 8px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--mu);font-weight:500}
 .nb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nb.active{color:var(--g)}
+
+/* ===== MANAGER AUDIT FORM ===== */
+#screen-manager{display:none;min-height:100vh;padding-bottom:40px;background:var(--bg)}
+.mgr-header{background:var(--g);padding:24px 20px 20px;text-align:center;color:#fff}
+.mgr-header .logo-big{width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin:0 auto 12px}
+.mgr-header h2{font-size:20px;font-weight:700;margin-bottom:4px}
+.mgr-header p{font-size:13px;opacity:.85}
+.mgr-body{padding:16px}
+
+/* SHARED STYLES */
 .pg{display:none;padding:16px}.pg.active{display:block}
 .card{background:#fff;border-radius:12px;border:1px solid var(--bd);padding:18px;margin-bottom:14px}
 label{font-size:12px;font-weight:500;color:var(--mu);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
@@ -58,7 +89,7 @@ textarea{min-height:80px;resize:vertical}
 .search-bar{display:flex;gap:8px;margin-bottom:10px}
 .search-bar input{flex:1;font-size:14px;padding:9px 12px}
 .search-bar input[type=date]{max-width:150px;font-size:13px}
-.ai{background:#fff;border-radius:12px;border:1px solid var(--bd);margin-bottom:10px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s}
+.ai{background:#fff;border-radius:12px;border:1px solid var(--bd);margin-bottom:10px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ai:active{opacity:.85}
 .ah{display:flex;align-items:center;padding:14px 16px;gap:10px}
 .an{font-size:15px;font-weight:600}
@@ -68,20 +99,15 @@ textarea{min-height:80px;resize:vertical}
 .comp-fill{height:100%;border-radius:2px;background:var(--g)}
 .comp-label{font-size:10px;color:var(--mu);font-weight:600;flex-shrink:0}
 
-/* SLIDING PANEL */
+/* PANELS */
 .panel{position:fixed;inset:0;background:#fff;z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .panel.open{transform:translateX(0)}
 .ph{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:#fff;z-index:10}
 .pb-btn{background:none;border:none;cursor:pointer;font-size:22px;color:var(--mu);padding:4px;line-height:1;flex-shrink:0}
 .ph-title{font-size:16px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ph-action{font-size:13px;font-weight:600;color:var(--g);padding:6px 12px;border:1px solid var(--g);border-radius:8px;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ph-action{font-size:13px;font-weight:600;color:var(--g);padding:6px 12px;border:1px solid var(--g);border-radius:8px;background:none;cursor:pointer}
 .pb{padding:16px}
-
-/* AUDIT DETAIL VIEW */
 .score-hero{border-radius:16px;padding:24px;text-align:center;margin-bottom:20px}
-.score-big{font-size:72px;font-weight:800;line-height:1}
-.score-lbl{font-size:15px;font-weight:600;margin-top:4px}
-.score-meta{display:flex;justify-content:center;gap:20px;margin-top:12px;font-size:13px;color:var(--mu);flex-wrap:wrap}
 .detail-sec{background:#fff;border-radius:12px;border:1px solid var(--bd);padding:16px;margin-bottom:14px}
 .detail-sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bg)}
 .tag-cards{display:flex;gap:8px;flex-wrap:wrap}
@@ -98,9 +124,6 @@ textarea{min-height:80px;resize:vertical}
 .info-item{background:var(--bg);border-radius:8px;padding:10px 12px}
 .info-item .lbl{color:var(--mu);font-size:11px;margin-bottom:2px}
 .info-item .val{font-weight:600;color:var(--tx)}
-
-/* EDIT MODE */
-.edit-stars{display:flex;gap:4px}
 .es{width:36px;height:36px;border-radius:8px;border:1px solid #ddd;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#ccc;background:#fafafa;-webkit-tap-highlight-color:transparent;user-select:none}
 .es.sr{background:var(--rl);border-color:var(--r);color:#A32D2D}
 .es.sa{background:var(--al);border-color:var(--a);color:#854F0B}
@@ -113,7 +136,6 @@ textarea{min-height:80px;resize:vertical}
 .cat-edit-row:last-child{border:none}
 .cat-edit-name{font-size:13px;font-weight:500;flex:1;margin-right:10px}
 .save-edit-btn{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;background:var(--g);color:#fff;margin-top:4px}
-.save-edit-btn:active{transform:scale(.98)}
 .del-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid #F09595;background:var(--rl);color:#A32D2D;margin-top:10px}
 
 /* CONFIRM */
@@ -174,16 +196,18 @@ textarea{min-height:80px;resize:vertical}
 @keyframes sp{to{transform:rotate(360deg)}}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:#1a1a18;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:all .3s;z-index:999;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* SUCCESS SCREEN */
+.success-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;text-align:center;background:var(--bg)}
+.success-icon{font-size:72px;margin-bottom:20px}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px;color:var(--g)}
+.success-sub{font-size:15px;color:var(--mu);line-height:1.6;margin-bottom:30px}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">G</div>
-  <div><h1>noahtouati007</h1><p id="sl">Chargement...</p></div>
-  <div class="dot" id="sd"></div>
-</header>
 <div class="toast" id="toast"></div>
 
+<!-- CONFIRM -->
 <div class="ov" id="cov">
   <div class="ob"><h3>Supprimer cet audit ?</h3><p id="ct">Action irreversible.</p>
   <div class="or"><button class="oc" onclick="closeC()">Annuler</button><button class="od" onclick="doDelete()">Supprimer</button></div></div>
@@ -193,7 +217,7 @@ textarea{min-height:80px;resize:vertical}
   <div class="or"><button class="oc" onclick="closeMC()">Annuler</button><button class="od" onclick="doDeleteMission()">Supprimer</button></div></div>
 </div>
 
-<!-- AUDIT PANEL -->
+<!-- AUDIT PANEL (admin) -->
 <div class="panel" id="dp">
   <div class="ph">
     <button class="pb-btn" onclick="closePanel('dp')">&#8592;</button>
@@ -213,65 +237,92 @@ textarea{min-height:80px;resize:vertical}
   <div class="pb" id="mp-body"></div>
 </div>
 
-<!-- AUDIT PAGE -->
-<div class="pg active" id="page-audit">
-  <div class="card">
-    <div class="fr"><label>Boutique *</label><input type="text" id="shopName" placeholder="Ex: Galzin Pompignane"/></div>
-    <div class="fg">
-      <div><label>Date</label><input type="date" id="auditDate"/></div>
-      <div><label>Audite par</label><input type="text" id="auditedBy" placeholder="Prenom"/></div>
+<!-- ===== ECRAN ACCUEIL ===== -->
+<div id="screen-home">
+  <div class="home-logo">G</div>
+  <div class="home-title">Boulangeries Galzin</div>
+  <div class="home-sub">Outil d audit qualite<br>des points de vente</div>
+  <button class="home-btn home-btn-public" onclick="goManager()">
+    📋 Remplir un audit
+  </button>
+  <button class="home-btn home-btn-private" onclick="showPwd()">
+    🔒 Espace prive
+  </button>
+  <div class="pwd-box" id="pwd-box">
+    <div class="pwd-row">
+      <input type="password" id="pwd-input" placeholder="Mot de passe..." onkeydown="if(event.key==='Enter')checkPwd()"/>
+      <button class="pwd-submit" onclick="checkPwd()">OK</button>
     </div>
+    <div class="pwd-error" id="pwd-error">Mot de passe incorrect</div>
   </div>
-  <div id="sc"></div>
-  <div class="card">
-    <div class="fr"><label>Observations generales</label><textarea id="globalNote" placeholder="Points forts, points faibles, ambiance..."></textarea></div>
-    <div class="fr" style="margin-bottom:0"><label>Actions a mener</label><textarea id="actionsNote" placeholder="Ce qu il faudrait ameliorer..."></textarea></div>
-  </div>
-  <div class="ss" id="ls"></div>
-  <button class="btn bp" onclick="submitAudit()">Enregistrer l audit</button>
-  <button class="btn bs" onclick="resetAudit()">Reinitialiser</button>
 </div>
 
-<!-- HISTORY PAGE -->
-<div class="pg" id="page-history">
-  <div class="hist-summary" id="hist-summary"></div>
-  <div class="search-bar">
-    <input type="text" id="h-search" placeholder="🔍 Rechercher une boutique..." oninput="filterHistory()"/>
-    <input type="date" id="h-date" onchange="filterHistory()"/>
+<!-- ===== ECRAN MANAGER (public) ===== -->
+<div id="screen-manager">
+  <div class="mgr-header">
+    <div class="logo-big">G</div>
+    <h2>Audit Qualite</h2>
+    <p>Merci de remplir ce formulaire apres votre visite</p>
   </div>
-  <div id="hc"><div class="spinner"></div></div>
+  <div class="mgr-body">
+    <div id="mgr-form-content"></div>
+  </div>
 </div>
 
-<!-- MISSIONS PAGE -->
-<div class="pg" id="page-missions">
-  <div class="missions-topbar">
-    <span id="missions-count">0 missions</span>
-    <button class="add-mission-btn" onclick="newMission()">+ Nouvelle mission</button>
-  </div>
-  <div id="missions-list"></div>
+<!-- SUCCESS après soumission manager -->
+<div class="success-screen" id="screen-success">
+  <div class="success-icon">✅</div>
+  <div class="success-title">Audit enregistre !</div>
+  <div class="success-sub">Merci pour votre retour.<br>L audit a bien ete transmis.</div>
+  <button class="btn bp" style="max-width:280px" onclick="goHome()">Retour a l accueil</button>
 </div>
 
-<!-- STATS PAGE -->
-<div class="pg" id="page-stats"><div id="stc"><div class="spinner"></div></div></div>
+<!-- ===== APP ADMIN ===== -->
+<div id="app">
+  <header>
+    <div class="logo">G</div>
+    <div><h1>noahtouati007</h1><p id="sl">Chargement...</p></div>
+    <div class="dot" id="sd"></div>
+    <button class="logout-btn" onclick="logout()">Deconnexion</button>
+  </header>
 
-<nav>
-  <button class="nb active" onclick="sw('audit',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 5H8a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-4z"/><path d="M9 9h6M9 12h6M9 15h4"/><path d="M12 3v4"/></svg>Audit
-  </button>
-  <button class="nb" id="nav-history" onclick="sw('history',this)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Historique
-  </button>
-  <button class="nb" onclick="sw('missions',this)">
-    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Missions
-  </button>
-  <button class="nb" onclick="sw('stats',this)">
-    <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Stats
-  </button>
-</nav>
+  <div class="pg active" id="page-history">
+    <div class="hist-summary" id="hist-summary"></div>
+    <div class="search-bar">
+      <input type="text" id="h-search" placeholder="🔍 Rechercher une boutique..." oninput="filterHistory()"/>
+      <input type="date" id="h-date" onchange="filterHistory()"/>
+    </div>
+    <div id="hc"><div class="spinner"></div></div>
+  </div>
+
+  <div class="pg" id="page-missions">
+    <div class="missions-topbar">
+      <span id="missions-count">0 missions</span>
+      <button class="add-mission-btn" onclick="newMission()">+ Nouvelle mission</button>
+    </div>
+    <div id="missions-list"></div>
+  </div>
+
+  <div class="pg" id="page-stats"><div id="stc"><div class="spinner"></div></div></div>
+
+  <nav>
+    <button class="nb active" id="nav-history" onclick="sw('history',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Historique
+    </button>
+    <button class="nb" onclick="sw('missions',this)">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Missions
+    </button>
+    <button class="nb" onclick="sw('stats',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Stats
+    </button>
+  </nav>
+</div>
 
 <script>
 var SB='https://fgvvfycyxulnwzttczyq.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZndnZmeWN5eHVsbnd6dHRjenlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDI2MzAsImV4cCI6MjA4OTkxODYzMH0.0-NzalmqzSpOSUofuBg-q-cBfql7xKvU101is7s4uWQ';
+var PASSWORD='noix';
+
 var CR=[
   {cat:'Vitrine & entree',key:'vitrine',items:['Proprete vitrine','Mise en valeur produits','Signaletique / prix','Attractivite exterieure']},
   {cat:'Accueil & service',key:'accueil',items:['Sourire & bonjour','Rapidite service','Connaissance produits','Gestion file attente']},
@@ -290,51 +341,118 @@ var MISSIONS_DEFAULT=[
   {id:'m5',boutique:'Baillargues',icon:'🏘️',type_label:'Analyse Offre',problematique:'Analyse offre et mise en avant pour attirer nouveaux clients.',axes:['Analyser zone de chalandise','Identifier opportunites visibilite locale','Proposer animations en boutique','Renforcer presence digitale locale'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''}
 ];
 
-var ratings={},pendingId=null,pendingMissionId=null,allAudits=[],missions=[],editingMission=false,currentMissionId=null,statsMode='global',currentAuditIdx=null,auditEditMode=false,editRatings={};
+var mgrRatings={},ratings={},pendingId=null,pendingMissionId=null,allAudits=[],missions=[],editingMission=false,currentMissionId=null,statsMode='global',currentAuditIdx=null,auditEditMode=false,editRatings={};
 
+/* ===== NAVIGATION ECRANS ===== */
+function showScreen(id){
+  ['screen-home','screen-manager','screen-success','app'].forEach(function(s){
+    document.getElementById(s).style.display='none';
+  });
+  var el=document.getElementById(id);
+  el.style.display=(id==='screen-success'||id==='screen-home')?'flex':(id==='app'?'block':'block');
+}
+
+function goHome(){showScreen('screen-home');}
+function goManager(){buildManagerForm();showScreen('screen-manager');}
+function logout(){sessionStorage.removeItem('galzin_auth');showScreen('screen-home');}
+
+function showPwd(){
+  var box=document.getElementById('pwd-box');
+  box.style.display=box.style.display==='none'||!box.style.display?'block':'none';
+  if(box.style.display==='block')setTimeout(function(){document.getElementById('pwd-input').focus();},100);
+}
+function checkPwd(){
+  var val=document.getElementById('pwd-input').value;
+  if(val===PASSWORD){
+    document.getElementById('pwd-error').style.display='none';
+    document.getElementById('pwd-input').value='';
+    document.getElementById('pwd-box').style.display='none';
+    sessionStorage.setItem('galzin_auth','1');
+    showScreen('app');
+    loadHistory();
+  }else{
+    document.getElementById('pwd-error').style.display='block';
+    document.getElementById('pwd-input').value='';
+    document.getElementById('pwd-input').focus();
+  }
+}
+
+/* ===== API ===== */
 async function api(m,p,b){
   setSy(true);
   try{var r=await fetch(SB+'/rest/v1/'+p,{method:m,headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK,'Prefer':m==='POST'?'return=representation':''},body:b?JSON.stringify(b):undefined});var t=await r.text();setSy(false);return t?JSON.parse(t):null;}
   catch(e){setSy(false);setOff();throw e;}
 }
-function setSy(v){document.getElementById('sd').className='dot '+(v?'sy':'on');document.getElementById('sl').textContent=v?'Synchronisation...':'Donnees en ligne';}
-function setOff(){document.getElementById('sd').className='dot';document.getElementById('sl').textContent='Hors ligne';}
+function setSy(v){var d=document.getElementById('sd');if(d){d.className='dot '+(v?'sy':'on');}var s=document.getElementById('sl');if(s)s.textContent=v?'Synchronisation...':'Donnees en ligne';}
+function setOff(){var d=document.getElementById('sd');if(d)d.className='dot';var s=document.getElementById('sl');if(s)s.textContent='Hors ligne';}
 
-/* ===== AUDIT FORM ===== */
-function buildForm(){
-  ratings={};var cont=document.getElementById('sc');cont.innerHTML='';
+/* ===== MANAGER FORM ===== */
+function buildManagerForm(){
+  mgrRatings={};
+  var cont=document.getElementById('mgr-form-content');
+  var html='<div class="card"><div class="fr"><label>Nom de la boutique *</label><input type="text" id="mgr-boutique" placeholder="Ex: Galzin Palavas"/></div>'
+    +'<div class="fg"><div><label>Date</label><input type="date" id="mgr-date" value="'+new Date().toISOString().split('T')[0]+'"/></div>'
+    +'<div><label>Votre nom</label><input type="text" id="mgr-name" placeholder="Prenom"/></div></div></div>';
+
   CR.forEach(function(s,si){
-    var card=document.createElement('div');card.className='card';card.style.marginBottom='14px';
-    card.innerHTML='<div class="sh">'+s.cat+'</div>';
+    html+='<div class="card"><div class="sh">'+s.cat+'</div>';
     s.items.forEach(function(item,ii){
-      var key=si+'-'+ii;ratings[key]=0;
-      var row=document.createElement('div');row.className='cr';
-      row.innerHTML='<span class="cl">'+item+'</span><div class="st" id="stars-'+key+'">'+[1,2,3,4,5].map(function(v){return'<div class="s" onclick="rate(\''+key+'\','+v+')">'+v+'</div>';}).join('')+'</div>';
-      card.appendChild(row);
-    });cont.appendChild(card);
-  });updateScore();
-}
-function rate(key,val){ratings[key]=val;document.querySelectorAll('#stars-'+key+' .s').forEach(function(s,i){var v=i+1;s.className='s'+(v<=val?(val<=2?' sr':val<=3?' sa':' sg'):'');s.textContent=v;});updateScore();}
-function cAvg(si,r){var v=CR[si].items.map(function(_,ii){return(r||ratings)[si+'-'+ii]||0;}).filter(function(v){return v>0;});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0;}
-function updateScore(){
-  var vals=Object.values(ratings).filter(function(v){return v>0;});
-  var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
-  var cls=avg>=4?'go':avg>=3?'mi':avg>0?'ba':'';
-  document.getElementById('ls').innerHTML='<div class="sb"><div class="l">Score</div><div class="v '+cls+'">'+(avg>0?avg.toFixed(1)+'/5':'--')+'</div></div><div class="sb"><div class="l">Notes</div><div class="v">'+vals.length+'/'+Object.keys(ratings).length+'</div></div><div class="sb"><div class="l">Avancee</div><div class="v">'+Math.round(vals.length/Object.keys(ratings).length*100)+'%</div></div>';
-}
-async function submitAudit(){
-  var name=document.getElementById('shopName').value.trim();if(!name){showToast('Saisis le nom de la boutique');return;}
-  var vals=Object.values(ratings).filter(function(v){return v>0;});
-  var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
-  var ca=CR.map(function(_,si){return cAvg(si);});
-  var sorted=ca.map(function(s,i){return{cat:CR[i].cat,score:s};}).filter(function(c){return c.score>0;}).sort(function(a,b){return a.score-b.score;});
-  var payload={boutique:name,date_audit:document.getElementById('auditDate').value||new Date().toISOString().split('T')[0],score_global:parseFloat(avg.toFixed(1)),statut:avg>=4?'Bon':avg>=3?'Moyen':'A ameliorer',vitrine:parseFloat(ca[0].toFixed(1))||null,accueil:parseFloat(ca[1].toFixed(1))||null,produits:parseFloat(ca[2].toFixed(1))||null,espace_interieur:parseFloat(ca[3].toFixed(1))||null,digital:parseFloat(ca[4].toFixed(1))||null,point_faible:sorted[0]?sorted[0].cat:null,point_fort:sorted[sorted.length-1]?sorted[sorted.length-1].cat:null,observations:document.getElementById('globalNote').value||null,actions:document.getElementById('actionsNote').value||null,audite_par:document.getElementById('auditedBy').value||null};
-  try{await api('POST','audits',payload);showToast('Audit enregistre !');resetAudit();sw('history',document.getElementById('nav-history'));}
-  catch(e){showToast('Erreur de connexion');}
-}
-function resetAudit(){['shopName','auditedBy','globalNote','actionsNote'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('auditDate').value=new Date().toISOString().split('T')[0];buildForm();}
+      var key='mgr-'+si+'-'+ii;
+      mgrRatings[key]=0;
+      html+='<div class="cr"><span class="cl">'+item+'</span>'
+        +'<div class="st" id="mgrstars-'+key+'">'+[1,2,3,4,5].map(function(v){return'<div class="s" onclick="mgrRate(\''+key+'\','+v+')">'+v+'</div>';}).join('')+'</div></div>';
+    });
+    html+='</div>';
+  });
 
-/* ===== HISTORY ===== */
+  html+='<div class="card">'
+    +'<div class="fr"><label>Observations generales</label><textarea id="mgr-obs" placeholder="Points forts, points faibles, ambiance..."></textarea></div>'
+    +'<div class="fr" style="margin-bottom:0"><label>Suggestions d amelioration</label><textarea id="mgr-actions" placeholder="Ce qui pourrait etre ameliore..."></textarea></div>'
+    +'</div>';
+
+  html+='<div id="mgr-score-strip" style="margin:14px 0"></div>';
+  html+='<button class="btn bp" onclick="submitManagerAudit()">Envoyer l audit</button>';
+  html+='<button class="btn bs" onclick="goHome()">Annuler</button>';
+
+  cont.innerHTML=html;
+  updateMgrScore();
+}
+
+function mgrRate(key,val){
+  mgrRatings[key]=val;
+  document.querySelectorAll('#mgrstars-'+key+' .s').forEach(function(s,i){
+    var v=i+1;s.className='s'+(v<=val?(val<=2?' sr':val<=3?' sa':' sg'):'');s.textContent=v;
+  });
+  updateMgrScore();
+}
+
+function updateMgrScore(){
+  var vals=Object.values(mgrRatings).filter(function(v){return v>0;});
+  var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
+  var total=Object.keys(mgrRatings).length;
+  var cls=avg>=4?'go':avg>=3?'mi':avg>0?'ba':'';
+  var strip=document.getElementById('mgr-score-strip');
+  if(strip){strip.innerHTML='<div class="ss"><div class="sb"><div class="l">Score</div><div class="v '+cls+'">'+(avg>0?avg.toFixed(1)+'/5':'--')+'</div></div><div class="sb"><div class="l">Rempli</div><div class="v">'+vals.length+'/'+total+'</div></div><div class="sb"><div class="l">Progression</div><div class="v">'+Math.round(vals.length/total*100)+'%</div></div></div>';}
+}
+
+async function submitManagerAudit(){
+  var boutique=document.getElementById('mgr-boutique').value.trim();
+  if(!boutique){showToast('Saisis le nom de la boutique');return;}
+  var vals=Object.values(mgrRatings).filter(function(v){return v>0;});
+  var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
+  var ca=CR.map(function(_,si){
+    var v=CR[si].items.map(function(_,ii){return mgrRatings['mgr-'+si+'-'+ii]||0;}).filter(function(v){return v>0;});
+    return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0;
+  });
+  var sorted=ca.map(function(s,i){return{cat:CR[i].cat,score:s};}).filter(function(c){return c.score>0;}).sort(function(a,b){return a.score-b.score;});
+  var payload={boutique:boutique,date_audit:document.getElementById('mgr-date').value||new Date().toISOString().split('T')[0],score_global:parseFloat(avg.toFixed(1)),statut:avg>=4?'Bon':avg>=3?'Moyen':'A ameliorer',vitrine:parseFloat(ca[0].toFixed(1))||null,accueil:parseFloat(ca[1].toFixed(1))||null,produits:parseFloat(ca[2].toFixed(1))||null,espace_interieur:parseFloat(ca[3].toFixed(1))||null,digital:parseFloat(ca[4].toFixed(1))||null,point_faible:sorted[0]?sorted[0].cat:null,point_fort:sorted[sorted.length-1]?sorted[sorted.length-1].cat:null,observations:document.getElementById('mgr-obs').value||null,actions:document.getElementById('mgr-actions').value||null,audite_par:document.getElementById('mgr-name').value||'Manager'};
+  try{
+    await api('POST','audits',payload);
+    showScreen('screen-success');
+  }catch(e){showToast('Erreur de connexion, reessaie');}
+}
+
+/* ===== HISTORY (admin) ===== */
 async function loadHistory(){
   document.getElementById('hc').innerHTML='<div class="spinner"></div>';
   document.getElementById('hist-summary').innerHTML='';
@@ -373,18 +491,16 @@ function renderHistList(data){
   var cont=document.getElementById('hc');
   if(!data.length){cont.innerHTML='<div class="empty">Aucun audit trouve.</div>';return;}
   var html='<div style="font-size:12px;color:var(--mu);margin-bottom:10px">'+data.length+' audit'+(data.length>1?'s':'')+' — clique pour le detail</div>';
-  data.forEach(function(a,idx){
+  data.forEach(function(a){
     var realIdx=allAudits.indexOf(a);
     var sc=parseFloat(a.score_global)||0;
     var bc=sc>=4?'gg':sc>=3?'ga':'gr';
     var lbl=sc>=4?'Bon':sc>=3?'Moyen':'A ameliorer';
     var cls=sc>=4?'go':sc>=3?'mi':'ba';
     var col=sc>=4?'var(--g)':sc>=3?'var(--a)':'var(--r)';
-    // Completeness: count non-null category scores
     var cats=[a.vitrine,a.accueil,a.produits,a.espace_interieur,a.digital];
     var filled=cats.filter(function(v){return v&&parseFloat(v)>0;}).length;
-    var hasNotes=(a.observations||a.actions)?1:0;
-    var compPct=Math.round((filled/5)*80+(hasNotes*20));
+    var compPct=Math.round((filled/5)*80+((a.observations||a.actions)?20:0));
     html+='<div class="ai" onclick="openAudit('+realIdx+')">'
       +'<div class="ah"><div style="flex:1;min-width:0">'
       +'<div class="an">'+a.boutique+'</div>'
@@ -393,10 +509,7 @@ function renderHistList(data){
       +'<div style="flex:1;height:5px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.round(sc/5*100)+'%;background:'+col+';border-radius:3px"></div></div>'
       +'<span class="v '+cls+'" style="font-size:13px;flex-shrink:0">'+sc+'/5</span>'
       +'</div>'
-      +'<div class="completeness">'
-      +'<div class="comp-bar"><div class="comp-fill" style="width:'+compPct+'%"></div></div>'
-      +'<span class="comp-label">'+compPct+'% complet</span>'
-      +'</div>'
+      +'<div class="completeness"><div class="comp-bar"><div class="comp-fill" style="width:'+compPct+'%"></div></div><span class="comp-label">'+compPct+'% complet</span></div>'
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:10px">'
       +'<span class="bg2 '+bc+'">'+lbl+'</span>'
@@ -408,10 +521,8 @@ function renderHistList(data){
 
 /* ===== AUDIT DETAIL + EDIT ===== */
 function openAudit(idx){
-  var a=allAudits[idx];
-  if(!a){showToast('Erreur : audit introuvable');return;}
-  currentAuditIdx=idx;
-  auditEditMode=false;
+  var a=allAudits[idx];if(!a){showToast('Erreur');return;}
+  currentAuditIdx=idx;auditEditMode=false;
   document.getElementById('dp-title').textContent=a.boutique;
   document.getElementById('dp-edit-btn').textContent='Modifier';
   renderAuditView(a);
@@ -422,8 +533,7 @@ function toggleAuditEdit(){
   auditEditMode=!auditEditMode;
   var a=allAudits[currentAuditIdx];if(!a)return;
   document.getElementById('dp-edit-btn').textContent=auditEditMode?'Annuler':'Modifier';
-  if(auditEditMode){renderAuditEdit(a);}
-  else{renderAuditView(a);}
+  if(auditEditMode){renderAuditEdit(a);}else{renderAuditView(a);}
 }
 
 function renderAuditView(a){
@@ -434,7 +544,6 @@ function renderAuditView(a){
   var col=sc>=4?'var(--g)':sc>=3?'var(--a)':'var(--r)';
   var cats=[{n:'Vitrine & entree',v:parseFloat(a.vitrine)||0},{n:'Accueil & service',v:parseFloat(a.accueil)||0},{n:'Produits',v:parseFloat(a.produits)||0},{n:'Espace interieur',v:parseFloat(a.espace_interieur)||0},{n:'Digital & reseaux',v:parseFloat(a.digital)||0}];
   var hasCats=cats.some(function(c){return c.v>0;});
-
   var barsHtml=hasCats?cats.map(function(c){
     if(!c.v)return'';
     var cc=c.v>=4?'var(--g)':c.v>=3?'var(--a)':'var(--r)';
@@ -442,17 +551,17 @@ function renderAuditView(a){
     var ecartHtml='';
     if(Math.abs(ecart)>0.2){ecartHtml='<span class="cat-ecart" style="'+(ecart>0?'background:var(--gl);color:#3B6D11':'background:var(--rl);color:#A32D2D')+'">'+(ecart>0?'+':'')+ecart.toFixed(1)+'</span>';}
     return'<div class="cat-bar"><div class="cat-bar-header"><span class="cat-bar-name">'+c.n+'</span><div style="display:flex;align-items:center">'+ecartHtml+'<span class="cat-bar-score" style="color:'+cc+'">'+c.v.toFixed(1)+'/5</span></div></div><div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+Math.round(c.v/5*100)+'%;background:'+cc+'"></div></div></div>';
-  }).join(''):'';
+  }).join(''):''
 
   document.getElementById('dp-body').innerHTML=
     '<div class="score-hero" style="background:linear-gradient(135deg,'+col+'20,'+col+'08);border:1px solid '+col+'30">'
-    +'<div class="score-big" style="color:'+col+'">'+sc+'<span style="font-size:28px;font-weight:400;color:var(--mu)">/5</span></div>'
-    +'<div class="score-lbl" style="color:'+col+'">'+lbl+'</div>'
-    +'<div class="score-meta">'+(a.date_audit?'<span>📅 '+a.date_audit+'</span>':'')+(a.audite_par?'<span>👤 '+a.audite_par+'</span>':'')+'</div>'
+    +'<div style="font-size:72px;font-weight:800;line-height:1;color:'+col+'">'+sc+'<span style="font-size:28px;font-weight:400;color:var(--mu)">/5</span></div>'
+    +'<div style="font-size:15px;font-weight:600;color:'+col+';margin-top:4px">'+lbl+'</div>'
+    +'<div style="display:flex;justify-content:center;gap:20px;margin-top:12px;font-size:13px;color:var(--mu);flex-wrap:wrap">'+(a.date_audit?'<span>📅 '+a.date_audit+'</span>':'')+(a.audite_par?'<span>👤 '+a.audite_par+'</span>':'')+'</div>'
     +'</div>'
     +((a.point_faible||a.point_fort)?'<div class="detail-sec"><div class="detail-sec-title">Points cles</div><div class="tag-cards">'+(a.point_faible?'<div class="tag-card" style="background:var(--rl)"><span style="font-size:20px">⚠️</span><div><div style="font-size:10px;color:#A32D2D;font-weight:600;text-transform:uppercase">Point faible</div><div style="font-size:13px;font-weight:700;color:#A32D2D">'+a.point_faible+'</div></div></div>':'')+(a.point_fort?'<div class="tag-card" style="background:var(--gl)"><span style="font-size:20px">✅</span><div><div style="font-size:10px;color:#3B6D11;font-weight:600;text-transform:uppercase">Point fort</div><div style="font-size:13px;font-weight:700;color:#3B6D11">'+a.point_fort+'</div></div></div>':'')+'</div></div>':'')
     +(hasCats?'<div class="detail-sec"><div class="detail-sec-title">Scores par categorie <span style="font-size:10px;font-weight:400;color:var(--mu)">(+/- vs moyenne)</span></div>'+barsHtml+'</div>':'')
-    +(a.observations?'<div class="detail-sec"><div class="detail-sec-title">💬 Observations generales</div><div class="detail-text">'+a.observations+'</div></div>':'')
+    +(a.observations?'<div class="detail-sec"><div class="detail-sec-title">💬 Observations</div><div class="detail-text">'+a.observations+'</div></div>':'')
     +(a.actions?'<div class="detail-sec"><div class="detail-sec-title">🎯 Actions a mener</div><div class="detail-text">'+a.actions+'</div></div>':'')
     +'<div class="detail-sec"><div class="detail-sec-title">Informations</div><div class="info-grid">'
     +(a.date_audit?'<div class="info-item"><div class="lbl">Date</div><div class="val">'+a.date_audit+'</div></div>':'')
@@ -465,24 +574,13 @@ function renderAuditView(a){
 }
 
 function renderAuditEdit(a){
-  // Init edit ratings from existing category scores
   editRatings={};
-  CR.forEach(function(s,si){
-    var catScore=parseFloat(a[s.key])||0;
-    s.items.forEach(function(_,ii){
-      editRatings[si+'-'+ii]=catScore>0?Math.round(catScore):0;
-    });
-  });
-
+  CR.forEach(function(s,si){var catScore=parseFloat(a[s.key])||0;s.items.forEach(function(_,ii){editRatings[si+'-'+ii]=catScore>0?Math.round(catScore):0;});});
   var catEditHtml=CR.map(function(s,si){
     var val=Math.round(parseFloat(a[s.key])||0);
     return'<div class="cat-edit-row"><span class="cat-edit-name">'+s.cat+'</span>'
-      +'<div class="edit-stars" id="estars-'+si+'">'+[1,2,3,4,5].map(function(v){
-        var cls=v<=val?(val<=2?'sr':val<=3?'sa':'sg'):'';
-        return'<div class="es '+(cls?'es '+cls:'')+'" onclick="rateEdit('+si+','+v+')">'+v+'</div>';
-      }).join('')+'</div></div>';
+      +'<div style="display:flex;gap:4px" id="estars-'+si+'">'+[1,2,3,4,5].map(function(v){var c=v<=val?(val<=2?'sr':val<=3?'sa':'sg'):'';return'<div class="es'+(c?' '+c:'')+'" onclick="rateEdit('+si+','+v+')">'+v+'</div>';}).join('')+'</div></div>';
   }).join('');
-
   document.getElementById('dp-body').innerHTML=
     '<div class="detail-sec"><div class="detail-sec-title">Informations</div>'
     +'<div class="edit-field"><label>Boutique</label><input type="text" id="e-boutique" value="'+a.boutique+'"/></div>'
@@ -492,7 +590,7 @@ function renderAuditEdit(a){
     +'</div></div>'
     +'<div class="detail-sec"><div class="detail-sec-title">Scores par categorie</div>'+catEditHtml+'</div>'
     +'<div class="detail-sec"><div class="detail-sec-title">Notes</div>'
-    +'<div class="edit-field"><label>Observations generales</label><textarea id="e-obs">'+(a.observations||'')+'</textarea></div>'
+    +'<div class="edit-field"><label>Observations</label><textarea id="e-obs">'+(a.observations||'')+'</textarea></div>'
     +'<div class="edit-field"><label>Actions a mener</label><textarea id="e-actions">'+(a.actions||'')+'</textarea></div>'
     +'</div>'
     +'<button class="save-edit-btn" onclick="saveAuditEdit(\''+a.id+'\')">Enregistrer les modifications</button>'
@@ -501,15 +599,12 @@ function renderAuditEdit(a){
 
 function rateEdit(si,val){
   CR[si].items.forEach(function(_,ii){editRatings[si+'-'+ii]=val;});
-  document.querySelectorAll('#estars-'+si+' .es').forEach(function(s,i){
-    var v=i+1;s.className='es'+(v<=val?(val<=2?' sr':val<=3?' sa':' sg'):'');s.textContent=v;
-  });
+  document.querySelectorAll('#estars-'+si+' .es').forEach(function(s,i){var v=i+1;s.className='es'+(v<=val?(val<=2?' sr':val<=3?' sa':' sg'):'');s.textContent=v;});
 }
 
 async function saveAuditEdit(id){
-  var boutique=document.getElementById('e-boutique').value.trim();
-  if(!boutique){showToast('Saisis le nom');return;}
-  var ca=CR.map(function(_,si){return cAvg(si,editRatings);});
+  var boutique=document.getElementById('e-boutique').value.trim();if(!boutique){showToast('Saisis le nom');return;}
+  var ca=CR.map(function(_,si){var v=CR[si].items.map(function(_,ii){return editRatings[si+'-'+ii]||0;}).filter(function(v){return v>0;});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0;});
   var vals=Object.values(editRatings).filter(function(v){return v>0;});
   var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
   var sorted=ca.map(function(s,i){return{cat:CR[i].cat,score:s};}).filter(function(c){return c.score>0;}).sort(function(a,b){return a.score-b.score;});
@@ -517,28 +612,21 @@ async function saveAuditEdit(id){
   try{
     await api('PATCH','audits?id=eq.'+id,payload);
     showToast('Audit mis a jour !');
-    // Refresh data
     var data=await api('GET','audits?order=date_audit.desc,created_at.desc');
     allAudits=data||[];
-    // Find new index
     var newIdx=allAudits.findIndex(function(x){return x.id===id;});
     currentAuditIdx=newIdx>=0?newIdx:0;
     auditEditMode=false;
     document.getElementById('dp-edit-btn').textContent='Modifier';
     document.getElementById('dp-title').textContent=allAudits[currentAuditIdx].boutique;
     renderAuditView(allAudits[currentAuditIdx]);
-    renderHistSummary();
-    renderHistList(allAudits);
+    renderHistSummary();renderHistList(allAudits);
   }catch(e){showToast('Erreur lors de la sauvegarde');}
 }
 
-function askDel(id,name){pendingId=id;document.getElementById('ct').textContent='Supprimer l audit de "'+name+'" ? Definitive et irreversible.';document.getElementById('cov').classList.add('open');}
+function askDel(id,name){pendingId=id;document.getElementById('ct').textContent='Supprimer l audit de "'+name+'" ? Definitive.';document.getElementById('cov').classList.add('open');}
 function closeC(){document.getElementById('cov').classList.remove('open');pendingId=null;}
-async function doDelete(){
-  if(!pendingId)return;var id=pendingId;closeC();closePanel('dp');
-  try{await api('DELETE','audits?id=eq.'+id);showToast('Audit supprime');loadHistory();}
-  catch(e){showToast('Erreur lors de la suppression');}
-}
+async function doDelete(){if(!pendingId)return;var id=pendingId;closeC();closePanel('dp');try{await api('DELETE','audits?id=eq.'+id);showToast('Audit supprime');loadHistory();}catch(e){showToast('Erreur');}}
 
 /* ===== STATS ===== */
 async function loadStats(){
@@ -569,7 +657,7 @@ function applyStats(){
 }
 function aa(arr){return arr.length?arr.reduce(function(a,b){return a+b;},0)/arr.length:0;}
 function renderGlobal(d){
-  if(!d.length)return'<div class="empty">Aucune donnee pour ces filtres</div>';
+  if(!d.length)return'<div class="empty">Aucune donnee</div>';
   var sc=d.map(function(a){return parseFloat(a.score_global);}).filter(function(v){return!isNaN(v);});
   var avg=aa(sc);var cls=avg>=4?'go':avg>=3?'mi':'ba';
   var best=d.slice().sort(function(a,b){return parseFloat(b.score_global)-parseFloat(a.score_global);})[0];
@@ -594,7 +682,7 @@ function renderSingle(name,d){
     +'<div class="card"><div class="sh">Evolution dans le temps</div>'+evol+'</div>';
 }
 function renderCmp2(n1,d1,n2,d2){
-  if(!d1.length&&!d2.length)return'<div class="empty">Aucune donnee pour ces boutiques</div>';
+  if(!d1.length&&!d2.length)return'<div class="empty">Aucune donnee</div>';
   var keys=['vitrine','accueil','produits','espace_interieur','digital'];var labels=['Vitrine','Accueil','Produits','Espace int.','Digital'];
   function bs(d){var sc=d.map(function(a){return parseFloat(a.score_global);}).filter(function(v){return!isNaN(v);});var avg=aa(sc);var ca=keys.map(function(k){var vs=d.map(function(a){return parseFloat(a[k]);}).filter(function(v){return!isNaN(v)&&v>0;});return aa(vs);});return{avg:avg,ca:ca,count:d.length};}
   var s1=bs(d1),s2=bs(d2);
@@ -604,8 +692,7 @@ function renderCmp2(n1,d1,n2,d2){
   html+='<div class="card"><div class="sh">Comparaison par categorie</div>';
   labels.forEach(function(lbl,i){
     var v1=s1.ca[i],v2=s2.ca[i];
-    var col1=v1>=4?'var(--g)':v1>=3?'var(--a)':'var(--r)';
-    var col2=v2>=4?'var(--g)':v2>=3?'var(--a)':'var(--r)';
+    var col1=v1>=4?'var(--g)':v1>=3?'var(--a)':'var(--r)';var col2=v2>=4?'var(--g)':v2>=3?'var(--a)':'var(--r)';
     var winner=v1>v2?'← '+n1:v2>v1?n2+' →':'Egalite';
     html+='<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:600">'+lbl+'</span><span style="font-size:11px;color:var(--mu)">'+winner+'</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:11px;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)">'+n1+'</span><div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;background:'+col1+';width:'+Math.round(v1/5*100)+'%"></div></div><span style="font-size:12px;font-weight:600;width:26px;text-align:right;color:var(--mu)">'+(v1>0?v1.toFixed(1):'--')+'</span></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)">'+n2+'</span><div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;background:'+col2+';width:'+Math.round(v2/5*100)+'%"></div></div><span style="font-size:12px;font-weight:600;width:26px;text-align:right;color:var(--mu)">'+(v2>0?v2.toFixed(1):'--')+'</span></div></div>';
   });
@@ -619,7 +706,7 @@ function renderMissions(){
   var order=['urgent','wip','todo','done'];
   var sorted=missions.slice().sort(function(a,b){return order.indexOf(a.statut)-order.indexOf(b.statut);});
   document.getElementById('missions-count').textContent=missions.length+' mission'+(missions.length>1?'s':'');
-  document.getElementById('missions-list').innerHTML=sorted.length?sorted.map(function(m){return'<div class="mc"><div class="mc-header" onclick="openMission(\''+m.id+'\')"><div class="mc-icon">'+m.icon+'</div><div class="mc-info"><div class="mc-name">'+m.boutique+'</div><div class="mc-type">'+m.type_label+'</div></div><span class="sp '+STATUS_CLS[m.statut]+'">'+STATUS[m.statut]+'</span><span style="font-size:18px;color:var(--mu);margin-left:6px">›</span></div></div>';}).join(''):'<div class="empty">Aucune mission.<br>Appuie sur "+ Nouvelle mission" !</div>';
+  document.getElementById('missions-list').innerHTML=sorted.length?sorted.map(function(m){return'<div class="mc"><div class="mc-header" onclick="openMission(\''+m.id+'\')"><div class="mc-icon">'+m.icon+'</div><div class="mc-info"><div class="mc-name">'+m.boutique+'</div><div class="mc-type">'+m.type_label+'</div></div><span class="sp '+STATUS_CLS[m.statut]+'">'+STATUS[m.statut]+'</span><span style="font-size:18px;color:var(--mu);margin-left:6px">›</span></div></div>';}).join(''):'<div class="empty">Aucune mission.</div>';
 }
 function newMission(){currentMissionId=null;editingMission=true;document.getElementById('mp-title').textContent='Nouvelle mission';document.getElementById('mp-edit-toggle').style.display='none';document.getElementById('mp-body').innerHTML=buildMissionForm(null);document.getElementById('mp').classList.add('open');}
 function openMission(id){currentMissionId=id;editingMission=false;var m=missions.find(function(x){return x.id===id;});if(!m)return;document.getElementById('mp-title').textContent=m.boutique;document.getElementById('mp-edit-toggle').textContent='Modifier';document.getElementById('mp-edit-toggle').style.display='';renderMissionView(m);document.getElementById('mp').classList.add('open');}
@@ -632,16 +719,16 @@ function buildMissionForm(m){
   var isNew=!m;var axesVal=m?m.axes:[''];
   var iconsHtml=ICONS.map(function(ic){return'<div class="icon-opt'+(m&&m.icon===ic?' selected':'')+"\" onclick=\"selectIcon(this,'"+ic+"')\">"+ic+'</div>';}).join('');
   return'<div class="mf-group"><label>Boutique / Nom *</label><input type="text" id="mf-boutique" value="'+(m?m.boutique:'')+'" placeholder="Ex: Galzin Palavas"/></div>'
-    +'<div class="mf-group"><label>Type / Categorie</label><input type="text" id="mf-type" value="'+(m?m.type_label:'')+'" placeholder="Concurrence, Offre restauration..."/></div>'
+    +'<div class="mf-group"><label>Type / Categorie</label><input type="text" id="mf-type" value="'+(m?m.type_label:'')+'" placeholder="Concurrence, Offre..."/></div>'
     +'<div class="mf-group"><label>Icone</label><div class="icon-picker">'+iconsHtml+'</div><input type="hidden" id="mf-icon" value="'+(m?m.icon:'🎯')+'"/></div>'
     +'<div class="mf-group"><label>Statut</label><select id="mf-statut">'+Object.keys(STATUS).map(function(k){return'<option value="'+k+'"'+(m&&m.statut===k?' selected':'')+'>'+STATUS[k]+'</option>';}).join('')+'</select></div>'
-    +'<div class="mf-group"><label>Problematique</label><textarea id="mf-problematique" placeholder="Decris l objectif...">'+(m?m.problematique:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Problematique</label><textarea id="mf-problematique">'+(m?m.problematique:'')+'</textarea></div>'
     +'<div class="mf-group"><label>Axes de travail</label><div class="axes-list" id="axes-list">'+axesVal.map(function(a,i){return axeRow(a,i);}).join('')+'</div><button class="add-axe-btn" onclick="addAxe()">+ Ajouter un axe</button></div>'
-    +'<div class="mf-group"><label>Analyse concurrence</label><textarea id="mf-concurrence" placeholder="Observations concurrents...">'+(m?m.concurrence:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Analyse de l offre</label><textarea id="mf-analyse" placeholder="Offre actuelle...">'+(m?m.analyse_offre:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Propositions</label><textarea id="mf-propositions" placeholder="Actions concretes...">'+(m?m.propositions:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Actions reseaux</label><textarea id="mf-reseaux" placeholder="Contenu, TikTok...">'+(m?m.actions_reseaux:'')+'</textarea></div>'
-    +'<div class="mf-group"><label>Notes</label><textarea id="mf-notes" placeholder="Autres observations...">'+(m?m.notes:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Analyse concurrence</label><textarea id="mf-concurrence">'+(m?m.concurrence:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Analyse de l offre</label><textarea id="mf-analyse">'+(m?m.analyse_offre:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Propositions</label><textarea id="mf-propositions">'+(m?m.propositions:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Actions reseaux</label><textarea id="mf-reseaux">'+(m?m.actions_reseaux:'')+'</textarea></div>'
+    +'<div class="mf-group"><label>Notes</label><textarea id="mf-notes">'+(m?m.notes:'')+'</textarea></div>'
     +'<button class="save-btn" onclick="saveMissionForm(\''+(isNew?'':m.id)+'\')">Enregistrer</button>'
     +(!isNew?'<button class="del-mission-btn" onclick="askDeleteMission(\''+m.id+'\',\''+m.boutique.replace(/\'/g,"\\'")+'\')">🗑 Supprimer cette mission</button>':'');
 }
@@ -659,8 +746,9 @@ function closePanel(id){document.getElementById(id).classList.remove('open');}
 function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});document.getElementById('page-'+n).classList.add('active');btn.classList.add('active');if(n==='history')loadHistory();if(n==='stats')loadStats();if(n==='missions')loadMissions();}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
-document.getElementById('auditDate').value=new Date().toISOString().split('T')[0];
-buildForm();setSy(false);
+/* ===== INIT ===== */
+if(sessionStorage.getItem('galzin_auth')==='1'){showScreen('app');loadHistory();}
+else{showScreen('screen-home');}
 </script>
 </body>
 </html>
