@@ -501,6 +501,7 @@ var PWD='noix';
 
 var SHOPS=["SARL GALZIN MILLAU MOULIN","SARL GALZIN MILLAU PLR","SARL GALZIN MILLAU TINE","SARL GALZIN MILLAU BONALD","SARL GALZIN SUD SEMAILLES","SARL GALZIN SUD BALARUC","SARL GALZIN LANGUEDOC POMPIGNANE","SARL GALZIN LITTORAL PALAVAS","SARL GALZIN BAILLARGUES","SARL GALZIN LITTORAL PEROLS","SARL GALZIN LANGUEDOC LATTES","SARL GALZIN LANGUEDOC CARNON","SARL GALZIN SUD ST JEAN","SARL LE FOURNIL DE LA GINESTE RODEZ","SARL GALZIN MILLAU PEUGEOT","SARL GALZIN LANGUEDOC SORIECH","SARL GALZIN LANGUEDOC ST ELOI","SARL GALZIN CASTELNAU LE LEZ","SARL GALZIN MILLAU EMMA","SARL LE FOURNIL DE LA GINESTE - BARAQUEVILLE","SARL LE FOURNIL DE PIGNAN","SARL GALZIN CANDILLARGUES","SARL GALZIN SUD MAURIN","SARL GALZIN SUD - PLATEFORME","SARL LE FOURNIL DE ST AFFRIQUE - VERDUN","SARL GALZIN SUD GARE ST ROCH","SARL GALZIN LANGUEDOC PORT MARIANNE","SARL GALZIN THAU POUSSAN","SARL LE FOURNIL DE LA GINESTE PRIMAUBE","SARL GALZIN LANGUEDOC - EUGENE ET MARIE","SARL GALZIN LITTORAL - PALAVES QUAI","SARL LE FOURNIL DE SAINT AFFRIQUE - BOREL","SARL GALZIN SUD - SABINES","GALZIN CENTRAL"];
 var SOPTS='<option value="">-- Choisir une boutique --</option>'+SHOPS.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+function buildSOPTS(){ return '<option value="">-- Choisir une boutique --</option>'+SHOPS.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join(''); }
 
 // NOUVEAU QUESTIONNAIRE - Notes /3 avec emojis
 var SECTIONS=[
@@ -586,6 +587,7 @@ var SECTIONS=[
 ];
 
 var SOPTS='<option value="">-- Choisir une boutique --</option>'+SHOPS.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+function buildSOPTS(){ return '<option value="">-- Choisir une boutique --</option>'+SHOPS.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join(''); }
 var STATUS={'todo':'A faire','wip':'En cours','done':'Termine','urgent':'Urgent'};
 var SCLS={'todo':'st-todo','wip':'st-wip','done':'st-done','urgent':'st-urgent'};
 var MDFT=[{id:'m1',boutique:'Palavas Quai',icon:'🌊',type_label:'Concurrence + Pro',problematique:"Concurrence Le Fournil d'Eugene.",axes:["Analyser offre Fournil d'Eugene",'Fidelisation pro','Offre B2B'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},{id:'m2',boutique:'Balaruc',icon:'💧',type_label:'Concurrence + Partenariats',problematique:'Concurrence Feuillette.',axes:['Etudier offre Feuillette','Cartographier pros','Kit B2B'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},{id:'m3',boutique:'Eugene et Marie',icon:'🥐',type_label:'Offre Restauration',problematique:'Attirer nouveaux clients.',axes:['Auditer snacking','Formules dejeuner','Contenu reseaux'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''},{id:'m4',boutique:'Fabreuges',icon:'🏡',type_label:'Offre Restauration',problematique:'Analyse offre restauration.',axes:['Rencontrer equipe','Auditer offre','Actions marketing'],statut:'wip',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:'Visite demain 09h30.'},{id:'m5',boutique:'Baillargues',icon:'🏘️',type_label:'Analyse Offre',problematique:'Attirer nouveaux clients.',axes:['Zone chalandise','Animations boutique','Presence digitale'],statut:'todo',concurrence:'',analyse_offre:'',propositions:'',actions_reseaux:'',notes:''}];
@@ -657,7 +659,7 @@ function renderWizStep(){
       +'<div style="font-size:15px;font-weight:700;color:var(--br);margin-bottom:4px">Audit Qualite Galzin</div>'
       +'<div style="font-size:13px;color:var(--tx2)">Merci de repondre honnêtement.<br>Vos retours aident a ameliorer nos boutiques.</div>'
       +'</div>'
-      +'<div class="f1"><label>Boutique visitee *</label><select id="mb" style="font-size:15px">'+SOPTS+'</select></div>'
+      +'<div class="f1"><label>Boutique visitee *</label><select id="mb" style="font-size:15px">'+buildSOPTS()+'</select></div>'
       +'<div class="f2" style="margin-top:12px">'
       +'<div class="f1"><label>Date</label><input type="date" id="md" value="'+new Date().toISOString().split('T')[0]+'"/></div>'
       +'<div class="f1"><label>Heure</label><input type="time" id="mh" value="'+new Date().toTimeString().slice(0,5)+'"/></div>'
@@ -1007,7 +1009,7 @@ function scrollChat(){var el=document.getElementById('chat-msgs');if(el)el.scrol
 
 // NAV
 function closePanel(id){document.getElementById(id).classList.remove('open');}
-function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops')loadShops();else if(n==='planning')loadPlanning();}
+function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops'){initShops();loadShops();loadShopsIndex();}else if(n==='planning')loadPlanning();}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
 
@@ -1045,10 +1047,108 @@ function saveShopMeta(meta){
   api('POST','shop_meta',payload,'resolution=merge-duplicates').catch(function(){});
 }
 
+
+// ── SHOP MANAGEMENT (add / rename / delete) ──
+
+// SHOPS is now dynamic — stored as a persisted array in localStorage + Supabase
+var SHOPS_KEY = 'galzin_shops_v2';
+
+function initShops(){
+  // If a saved custom list exists, use it; otherwise keep the built-in array
+  var saved = localStorage.getItem(SHOPS_KEY);
+  if(saved){
+    try{ SHOPS = JSON.parse(saved); }catch(e){}
+  }
+  // Sync from Supabase shop_meta to pick up any server-side changes (names stored in shop_name)
+  // We just keep SHOPS as source of truth for now
+}
+
+function persistShops(){
+  localStorage.setItem(SHOPS_KEY, JSON.stringify(SHOPS));
+  // Also push the list to Supabase as a single record so it's shared across devices
+  api('POST','shop_meta',{id:'__index__',shop_name:'__index__',manager:JSON.stringify(SHOPS),updated_at:new Date().toISOString()},'resolution=merge-duplicates').catch(function(){});
+}
+
+function loadShopsIndex(){
+  // Try to load the shops list from Supabase
+  api('GET','shop_meta?id=eq.__index__').then(function(data){
+    if(data&&data.length&&data[0].manager){
+      try{
+        var remote = JSON.parse(data[0].manager);
+        if(Array.isArray(remote)&&remote.length>0){
+          SHOPS = remote;
+          localStorage.setItem(SHOPS_KEY, JSON.stringify(SHOPS));
+          loadShops(); // re-render with updated list
+        }
+      }catch(e){}
+    }
+  }).catch(function(){});
+}
+
+function addShop(){
+  var name = prompt('Nom de la nouvelle boutique :','');
+  if(!name || !name.trim()) return;
+  name = name.trim().toUpperCase();
+  if(SHOPS.indexOf(name) > -1){ showToast('Cette boutique existe déjà'); return; }
+  SHOPS.push(name);
+  persistShops();
+  loadShops();
+  showToast('Boutique ajoutée !');
+}
+
+function editShopName(idx, evt){
+  evt.stopPropagation();
+  var current = SHOPS[idx];
+  var newName = prompt('Nouveau nom :', current);
+  if(!newName || !newName.trim() || newName.trim() === current) return;
+  newName = newName.trim();
+  // Update the name everywhere
+  var oldId = 'shop_'+idx;
+  SHOPS[idx] = newName;
+  persistShops();
+  // Update cached meta if exists
+  var cached = localStorage.getItem(shopKey(idx));
+  if(cached){
+    try{
+      var m = JSON.parse(cached);
+      m.name = newName;
+      localStorage.setItem(shopKey(idx), JSON.stringify(m));
+    }catch(e){}
+  }
+  // Update Supabase shop_meta name
+  api('PATCH','shop_meta?id=eq.'+oldId,{shop_name:newName,updated_at:new Date().toISOString()}).catch(function(){});
+  loadShops();
+  showToast('Boutique renommée !');
+}
+
+function deleteShop(idx, evt){
+  evt.stopPropagation();
+  var name = SHOPS[idx];
+  // Check if audits exist for this shop
+  var auditCount = allA.filter(function(a){ return a.boutique === name; }).length;
+  var msg = 'Supprimer "'+name+'" ?';
+  if(auditCount > 0) msg += '\n\n⚠️ Attention : '+auditCount+' audit(s) liés à cette boutique (ils ne seront pas supprimés).';
+  if(!confirm(msg)) return;
+  
+  // Remove from array — shift everything after down
+  SHOPS.splice(idx, 1);
+  persistShops();
+  // Clean up local cache for this shop
+  localStorage.removeItem(shopKey(idx));
+  // Clean up Supabase shop_meta + shop_notes
+  api('DELETE','shop_meta?id=eq.shop_'+idx).catch(function(){});
+  api('DELETE','shop_notes?shop_id=eq.shop_'+idx).catch(function(){});
+  loadShops();
+  showToast('Boutique supprimée');
+}
+
 function loadShops(){
   var el = document.getElementById('shops-content');
   if(!el) return;
-  var html = '<div style="margin-bottom:12px"><div style="font-size:13px;color:var(--tx3)">'+SHOPS.length+' boutiques · clique pour ouvrir la fiche</div></div>';
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    + '<div style="font-size:13px;color:var(--tx3)">'+SHOPS.length+' boutiques</div>'
+    + '<button onclick="addShop()" style="display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--br);color:var(--or);border:1px solid rgba(200,134,10,.3);border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Ajouter</button>'
+    + '</div>';
   // Group by region keyword
   var groups = {
     'Millau': [], 'Languedoc': [], 'Littoral / Palavas': [], 'Sud': [],
@@ -1078,16 +1178,20 @@ function loadShops(){
         var sc_col = sc>=4?'var(--ok)':sc>=3?'var(--wa)':'var(--er)';
         scoreHtml = '<span style="font-size:11px;font-weight:700;color:'+sc_col+';padding:2px 7px;border-radius:10px;background:'+(sc>=4?'var(--ok-bg)':sc>=3?'var(--wa-bg)':'var(--er-bg)')+'">'+sc+'/5</span>';
       }
-      html += '<div onclick="openShop('+item.i+')" style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s" onmouseenter="this.style.borderColor=\'var(--or)\';" onmouseleave="this.style.borderColor=\'var(--bd)\'">'
-        + '<div style="width:40px;height:40px;border-radius:10px;background:var(--or-pale);border:1px solid var(--or-bdr);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏪</div>'
-        + '<div style="flex:1;min-width:0">'
+      html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
+        + '<div onclick="openShop('+item.i+')" style="width:40px;height:40px;border-radius:10px;background:var(--or-pale);border:1px solid var(--or-bdr);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;cursor:pointer">🏪</div>'
+        + '<div onclick="openShop('+item.i+')" style="flex:1;min-width:0;cursor:pointer">'
         + '<div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.s+'</div>'
         + '<div style="font-size:11px;color:var(--tx3);margin-top:2px;display:flex;gap:10px">'
         + (auditCount ? '<span>📋 '+auditCount+' audit'+(auditCount>1?'s':'')+'</span>' : '<span style="color:var(--bd)">Aucun audit</span>')
         + (noteCount ? '<span>📝 '+noteCount+' note'+(noteCount>1?'s':'')+'</span>' : '')
         + (meta.manager ? '<span>👤 '+meta.manager+'</span>' : '')
         + '</div></div>'
-        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">'+scoreHtml+'<span style="font-size:16px;color:var(--tx3)">›</span></div>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+        + scoreHtml
+        + '<button onclick="editShopName('+item.i+',event)" style="width:30px;height:30px;border-radius:8px;background:var(--bl-bg);border:1px solid rgba(26,96,200,.2);color:var(--bl);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Renommer">✏️</button>'
+        + '<button onclick="deleteShop('+item.i+',event)" style="width:30px;height:30px;border-radius:8px;background:var(--er-bg);border:1px solid rgba(201,32,32,.2);color:var(--er);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Supprimer">🗑</button>'
+        + '</div>'
         + '</div>';
     });
   });
