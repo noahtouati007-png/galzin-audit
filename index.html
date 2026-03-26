@@ -1009,7 +1009,7 @@ function scrollChat(){var el=document.getElementById('chat-msgs');if(el)el.scrol
 
 // NAV
 function closePanel(id){document.getElementById(id).classList.remove('open');}
-function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops'){initShops();loadShops();loadShopsIndex();}else if(n==='planning')loadPlanning();}
+function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops'){initShops();loadShops();loadShopsIndex();}else if(n==='planning'){initPlanning();loadPlanning();}}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
 
@@ -1518,8 +1518,9 @@ function renderPlanning(){
     + '<span style="font-size:14px;font-weight:600;color:var(--tx)">'+weekLabel+'</span>'
     + '<button onclick="planningNav(1)" style="width:34px;height:34px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--bd);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>'
     + '</div>'
-    + '<div style="display:flex;gap:7px;align-items:center">'
+    + '<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">'
     + '<button onclick="planningToday()" style="padding:7px 12px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--bd);font-size:12px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:var(--f)">Aujourd hui</button>'
+    + '<button onclick="openEventsManager()" style="padding:8px 12px;border-radius:var(--r);background:var(--bl-bg);color:var(--bl);border:1px solid rgba(26,96,200,.25);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">🔁 Événements</button>'
     + '<button onclick="newPost(null)" style="padding:8px 14px;border-radius:var(--r);background:var(--br);color:var(--or);border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Post</button>'
     + '</div></div>'
     // Week grid
@@ -1676,6 +1677,354 @@ function deletePost(postId){
   deletePlanningPostRemote(postId);
   showToast('Post supprime');
   closePostPanel();
+}
+
+
+
+// ═══════════════════════════════════════════════════════════
+// RECURRING EVENTS SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+var EVENTS_KEY = 'galzin_events_v1';
+var planningEvents = [];  // list of recurring event definitions
+
+function loadEvents(){
+  var s = localStorage.getItem(EVENTS_KEY);
+  planningEvents = s ? JSON.parse(s) : [];
+  // Sync from Supabase
+  api('GET','planning_posts?id=like.evt_%25&order=created_at.asc').then(function(data){
+    // Events are stored as special planning_posts with id starting with "evt_def_"
+    // We store event DEFINITIONS in a separate localStorage key + Supabase
+  }).catch(function(){});
+  fetchEventsFromSupabase();
+}
+
+function saveEvents(){
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(planningEvents));
+  // Persist each event definition to Supabase as a special planning_post
+  planningEvents.forEach(function(ev){
+    var payload = {
+      id: 'evt_def_' + ev.id,
+      title: '__EVENT_DEF__:' + JSON.stringify(ev),
+      post_date: ev.dateFrom,
+      status: 'Idée',
+      network: ev.network || '',
+      content_type: ev.type || '',
+      brief: ev.brief || '',
+      updated_at: new Date().toISOString()
+    };
+    api('POST','planning_posts',payload,'resolution=merge-duplicates').catch(function(){});
+  });
+}
+
+function fetchEventsFromSupabase(){
+  api('GET','planning_posts?title=like.__EVENT_DEF__%25').then(function(data){
+    if(!data||!data.length) return;
+    var remote = [];
+    data.forEach(function(r){
+      try{
+        var def = JSON.parse(r.title.replace('__EVENT_DEF__:',''));
+        if(def && def.id) remote.push(def);
+      }catch(e){}
+    });
+    if(remote.length > 0){
+      planningEvents = remote;
+      localStorage.setItem(EVENTS_KEY, JSON.stringify(planningEvents));
+    }
+  }).catch(function(){});
+}
+
+// Generate individual posts from event definitions into planningPosts
+function applyEventsToPlanning(){
+  var DAYS_MAP = {0:'dim',1:'lun',2:'mar',3:'mer',4:'jeu',5:'ven',6:'sam'};
+
+  planningEvents.forEach(function(ev){
+    if(!ev.active) return;
+    var from = new Date(ev.dateFrom);
+    var to = ev.dateTo ? new Date(ev.dateTo) : new Date(from.getFullYear(), from.getMonth()+3, from.getDate()); // default 3 months
+    to.setHours(23,59,59);
+
+    // Iterate through each day in range
+    var d = new Date(from);
+    d.setHours(0,0,0,0);
+    var generated = 0;
+    while(d <= to && generated < 200){
+      var dow = d.getDay(); // 0=Sunday...6=Saturday
+      var dowKey = DAYS_MAP[dow];
+      if(!ev.days || ev.days.indexOf(dowKey) > -1){
+        var dateStr = d.toISOString().split('T')[0];
+        // Check if this generated post already exists
+        var existingId = 'evt_' + ev.id + '_' + dateStr;
+        var alreadyExists = planningPosts.find(function(p){ return p.id === existingId; });
+        if(!alreadyExists){
+          var post = {
+            id: existingId,
+            title: ev.title,
+            date: dateStr,
+            time: ev.time || '',
+            network: ev.network || '',
+            type: ev.type || '',
+            status: ev.status || 'Idée',
+            brief: ev.brief || '',
+            url: '',
+            fromEvent: ev.id // mark as generated
+          };
+          planningPosts.push(post);
+          // Save to Supabase
+          upsertPlanningPost(post);
+        }
+      }
+      d.setDate(d.getDate()+1);
+      generated++;
+    }
+  });
+}
+
+// Open the Events Manager panel
+function openEventsManager(){
+  var existing = document.getElementById('events-panel');
+  if(existing) existing.remove();
+  var panel = document.createElement('div');
+  panel.id = 'events-panel';
+  panel.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)';
+  document.body.appendChild(panel);
+  renderEventsPanel(panel);
+  requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+}
+
+function closeEventsPanel(){
+  var p = document.getElementById('events-panel');
+  if(p){ p.style.transform='translateX(100%)'; setTimeout(function(){p.remove();},300); }
+  // Re-apply events and re-render planning
+  applyEventsToPlanning();
+  savePlanningData();
+  renderPlanning();
+}
+
+function renderEventsPanel(panel){
+  loadEvents();
+  var html =
+    // Top bar
+    '<div style="background:var(--br);border-bottom:2px solid var(--or);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">'
+    + '<button onclick="closeEventsPanel()" style="background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.25);border-radius:var(--r);padding:7px 13px;color:#FFF8E8;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)">← Retour</button>'
+    + '<span style="font-size:15px;font-weight:600;color:#FFF8E8;flex:1">🔁 Événements récurrents</span>'
+    + '<button onclick="openEventEditor(null)" style="padding:8px 14px;background:var(--or);color:var(--br);border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Créer</button>'
+    + '</div>'
+    + '<div style="padding:16px">'
+    // Info banner
+    + '<div style="background:var(--bl-bg);border:1px solid rgba(26,96,200,.2);border-radius:var(--r2);padding:13px 15px;margin-bottom:16px;font-size:13px;color:var(--bl);line-height:1.55">'
+    + '📅 Un événement récurrent génère automatiquement des posts dans ton planning sur la période choisie. Tu peux définir les jours, le réseau et le type de contenu.'
+    + '</div>';
+
+  if(!planningEvents.length){
+    html += '<div style="text-align:center;padding:48px 20px;color:var(--tx3);font-size:14px;line-height:1.8">🔁 Aucun événement récurrent.<br>Crée-en un pour remplir ton planning automatiquement.</div>';
+  } else {
+    var FR_DAYS_LABELS = {lun:'Lun',mar:'Mar',mer:'Mer',jeu:'Jeu',ven:'Ven',sam:'Sam',dim:'Dim'};
+    planningEvents.forEach(function(ev){
+      var daysLabel = ev.days && ev.days.length ? ev.days.map(function(d){return FR_DAYS_LABELS[d]||d;}).join(', ') : 'Tous les jours';
+      var periodLabel = ev.dateFrom + (ev.dateTo?' → '+ev.dateTo:'');
+      html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:10px">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">'
+        + '<div>'
+        + '<div style="font-size:15px;font-weight:700;color:var(--tx);margin-bottom:4px">'+(NET_EMOJIS[ev.network]||'📢')+' '+ev.title+'</div>'
+        + '<div style="font-size:12px;color:var(--tx3);display:flex;gap:10px;flex-wrap:wrap">'
+        + '<span>📅 '+periodLabel+'</span>'
+        + '<span>🗓 '+daysLabel+'</span>'
+        + (ev.time?'<span>⏰ '+ev.time+'</span>':'')
+        + (ev.network?'<span>'+ev.network+'</span>':'')
+        + '</div>'
+        + '</div>'
+        // Active toggle
+        + '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0">'
+        + '<input type="checkbox" id="ev-active-'+ev.id+'" '+(ev.active?'checked':'')+' onchange="toggleEvent(\''+ev.id+'\',this.checked)" style="width:16px;height:16px;accent-color:var(--ok);cursor:pointer"/>'
+        + '<span style="font-size:12px;color:var(--tx3);font-weight:600">Actif</span>'
+        + '</label>'
+        + '</div>'
+        + (ev.brief?'<div style="font-size:12px;color:var(--tx3);background:var(--bg3);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">'+ev.brief+'</div>':'')
+        + '<div style="display:flex;gap:8px">'
+        + '<button onclick="openEventEditor(\''+ev.id+'\')" style="flex:1;padding:9px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--bd);font-size:13px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:var(--f)">✏️ Modifier</button>'
+        + '<button onclick="deleteEvent(\''+ev.id+'\')" style="padding:9px 14px;border-radius:var(--r);background:var(--er-bg);border:1px solid rgba(201,32,32,.2);font-size:13px;font-weight:600;cursor:pointer;color:var(--er);font-family:var(--f)">🗑</button>'
+        + '</div></div>';
+    });
+  }
+  html += '</div>';
+  panel.innerHTML = html;
+}
+
+function toggleEvent(evId, active){
+  var ev = planningEvents.find(function(e){ return e.id===evId; });
+  if(ev){ ev.active = active; saveEvents(); }
+}
+
+function deleteEvent(evId){
+  if(!confirm('Supprimer cet événement récurrent ?\nLes posts déjà générés dans le planning ne seront pas supprimés.')) return;
+  planningEvents = planningEvents.filter(function(e){ return e.id!==evId; });
+  saveEvents();
+  // Remove definition from Supabase
+  api('DELETE','planning_posts?id=eq.evt_def_'+evId).catch(function(){});
+  var panel = document.getElementById('events-panel');
+  if(panel) renderEventsPanel(panel);
+  showToast('Événement supprimé');
+}
+
+// Event Editor — create or edit a recurring event
+function openEventEditor(evId){
+  var ev = evId ? planningEvents.find(function(e){ return e.id===evId; }) : null;
+  var existing = document.getElementById('event-editor-panel');
+  if(existing) existing.remove();
+  var panel = document.createElement('div');
+  panel.id = 'event-editor-panel';
+  panel.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:400;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)';
+  document.body.appendChild(panel);
+
+  var today = new Date().toISOString().split('T')[0];
+  var in3m = new Date(); in3m.setMonth(in3m.getMonth()+3);
+  var in3mStr = in3m.toISOString().split('T')[0];
+
+  var FR_DAYS = [{k:'lun',l:'Lun'},{k:'mar',l:'Mar'},{k:'mer',l:'Mer'},{k:'jeu',l:'Jeu'},{k:'ven',l:'Ven'},{k:'sam',l:'Sam'},{k:'dim',l:'Dim'}];
+
+  var daysHtml = FR_DAYS.map(function(d){
+    var sel = !ev || (ev.days && ev.days.indexOf(d.k) > -1);
+    return '<button id="day-'+d.k+'" onclick="toggleDay(\''+d.k+'\')" style="flex:1;padding:10px 4px;border-radius:var(--r);border:2px solid '+(sel?'var(--or)':'var(--bd)')+';background:'+(sel?'var(--or-pale)':'var(--bg3)')+';font-size:12px;font-weight:700;cursor:pointer;color:'+(sel?'var(--or)':'var(--tx3)')+';font-family:var(--f)">'+d.l+'</button>';
+  }).join('');
+
+  panel.innerHTML =
+    '<div style="background:var(--br);border-bottom:2px solid var(--or);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">'
+    + '<button onclick="closeEventEditor()" style="background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.25);border-radius:var(--r);padding:7px 13px;color:#FFF8E8;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)">← Retour</button>'
+    + '<span style="font-size:15px;font-weight:600;color:#FFF8E8;flex:1">'+(ev?'Modifier l\'événement':'Nouvel événement')+'</span>'
+    + '</div>'
+    + '<div style="padding:16px">'
+
+    // Titre
+    + '<div class="mf-g"><label>Titre de l\'événement *</label><input type="text" id="ev-title" value="'+(ev?ev.title:'')+'" placeholder="Ex: Post Instagram du lundi, Vidéo TikTok..."/></div>'
+
+    // Réseau + Type
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="mf-g"><label>Réseau</label><select id="ev-network">'+NETWORKS.map(function(n){return'<option'+(ev&&ev.network===n?' selected':'')+'>'+n+'</option>';}).join('')+'</select></div>'
+    + '<div class="mf-g"><label>Type</label><select id="ev-type">'+CONTENT_TYPES.map(function(t){return'<option'+(ev&&ev.type===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
+    + '</div>'
+
+    // Période
+    + '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:14px">'
+    + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:12px">Période</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="mf-g"><label>Du</label><input type="date" id="ev-from" value="'+(ev?ev.dateFrom:today)+'"/></div>'
+    + '<div class="mf-g"><label>Au (optionnel)</label><input type="date" id="ev-to" value="'+(ev&&ev.dateTo?ev.dateTo:in3mStr)+'"/></div>'
+    + '</div>'
+    + '<div class="mf-g"><label>Heure (optionnel)</label><input type="time" id="ev-time" value="'+(ev&&ev.time?ev.time:'09:00')+'"/></div>'
+    + '</div>'
+
+    // Jours de la semaine
+    + '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:14px">'
+    + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:12px">Jours de la semaine</div>'
+    + '<div style="display:flex;gap:5px">'+daysHtml+'</div>'
+    + '<div style="font-size:11px;color:var(--tx3);margin-top:8px">Sélectionne les jours où ce post doit apparaître</div>'
+    + '</div>'
+
+    // Statut par défaut
+    + '<div class="mf-g"><label>Statut par défaut</label><select id="ev-status">'+POST_STATUS.map(function(s){return'<option'+(ev&&ev.status===s?' selected':(!ev&&s==='Idée')?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>'
+
+    // Brief
+    + '<div class="mf-g"><label>Brief / Description du contenu</label><textarea id="ev-brief" placeholder="Décris le type de contenu à produire, le ton, les hashtags habituels...">'+(ev?ev.brief||'':'')+'</textarea></div>'
+
+    + '</div>'
+
+    + '<div style="padding:0 16px 32px;display:flex;flex-direction:column;gap:10px">'
+    + '<button onclick="saveEvent('+(ev?'\''+ev.id+'\'':'null')+')" style="width:100%;padding:15px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">'+(ev?'Enregistrer les modifications':'Créer l\'événement')+'</button>'
+    + '</div>';
+
+  requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+}
+
+// Toggle day selection button
+var _selectedDays = null;
+function toggleDay(k){
+  var btn = document.getElementById('day-'+k);
+  if(!btn) return;
+  var isActive = btn.style.borderColor.indexOf('or') > -1 || btn.style.background.indexOf('or') > -1;
+  // Check by class hint — use data attribute
+  var active = btn.getAttribute('data-active') === '1';
+  // Better: check background
+  var isOr = btn.style.background.indexOf('var(--or-pale)') > -1 || btn.style.backgroundColor === 'var(--or-pale)';
+  // Simplest: toggle via data
+  var on = btn.dataset.on === '1';
+  btn.dataset.on = on ? '0' : '1';
+  if(on){
+    btn.style.border = '2px solid var(--bd)';
+    btn.style.background = 'var(--bg3)';
+    btn.style.color = 'var(--tx3)';
+  } else {
+    btn.style.border = '2px solid var(--or)';
+    btn.style.background = 'var(--or-pale)';
+    btn.style.color = 'var(--or)';
+  }
+}
+
+function getSelectedDays(){
+  var FR_DAYS_KEYS = ['lun','mar','mer','jeu','ven','sam','dim'];
+  var selected = [];
+  FR_DAYS_KEYS.forEach(function(k){
+    var btn = document.getElementById('day-'+k);
+    if(!btn) return;
+    // Active if not explicitly toggled off (data-on='0')
+    var off = btn.dataset.on === '0';
+    var initiallyOn = btn.style.border.indexOf('var(--or)') > -1;
+    // If never toggled, check initial state (the border color set at creation)
+    if(btn.dataset.on === undefined){
+      // Initial state: active if border is var(--or)
+      if(initiallyOn) selected.push(k);
+    } else {
+      if(btn.dataset.on === '1') selected.push(k);
+    }
+  });
+  return selected.length > 0 ? selected : FR_DAYS_KEYS; // default all days
+}
+
+function saveEvent(evId){
+  var title = document.getElementById('ev-title').value.trim();
+  if(!title){ showToast('Saisis un titre'); return; }
+  var from = document.getElementById('ev-from').value;
+  if(!from){ showToast('Choisis une date de début'); return; }
+  var days = getSelectedDays();
+  if(!days.length){ showToast('Sélectionne au moins un jour'); return; }
+
+  var ev = {
+    id: evId || ('ev'+Date.now()),
+    title: title,
+    network: document.getElementById('ev-network').value,
+    type: document.getElementById('ev-type').value,
+    dateFrom: from,
+    dateTo: document.getElementById('ev-to').value || null,
+    time: document.getElementById('ev-time').value || '',
+    days: days,
+    status: document.getElementById('ev-status').value,
+    brief: document.getElementById('ev-brief').value || '',
+    active: true
+  };
+
+  if(evId){
+    var idx = planningEvents.findIndex(function(e){ return e.id===evId; });
+    if(idx > -1) planningEvents[idx] = ev; else planningEvents.push(ev);
+  } else {
+    planningEvents.push(ev);
+  }
+  saveEvents();
+  showToast(evId ? 'Événement mis à jour !' : 'Événement créé !');
+  closeEventEditor();
+  // Re-render events panel
+  var panel = document.getElementById('events-panel');
+  if(panel) renderEventsPanel(panel);
+}
+
+function closeEventEditor(){
+  var p = document.getElementById('event-editor-panel');
+  if(p){ p.style.transform='translateX(100%)'; setTimeout(function(){p.remove();},300); }
+}
+
+// On app load, apply events to fill planning
+function initPlanning(){
+  loadEvents();
+  applyEventsToPlanning();
 }
 
 
