@@ -394,10 +394,30 @@ body{font-family:var(--f);background:var(--bg);color:var(--tx);-webkit-font-smoo
   </div>
 </div>
 
-<!-- MANAGER -->
+<!-- MANAGER WIZARD -->
 <div class="sc" id="sc-mgr">
-  <div class="top-bar"><button class="tb-back" onclick="goHome()">← Retour</button><div class="tb-info"><div class="tb-title">Audit Qualite Galzin</div><div class="tb-sub">Questionnaire terrain</div></div></div>
-  <div class="mgr-scroll" id="mgr-scroll"><div id="mgr-form"></div></div>
+  <!-- Top bar -->
+  <div class="top-bar">
+    <button class="tb-back" id="wiz-back-btn" onclick="wizBack()">← Retour</button>
+    <div class="tb-info">
+      <div class="tb-title" id="wiz-section-title">Audit Qualite</div>
+      <div class="tb-sub" id="wiz-section-sub">Questionnaire terrain</div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,248,232,.5);font-weight:600;padding:4px 10px;background:rgba(200,134,10,.15);border-radius:6px;border:1px solid rgba(200,134,10,.25)" id="wiz-counter">1 / 9</div>
+  </div>
+  <!-- Step progress bar -->
+  <div style="background:var(--br);padding:0 16px 12px;flex-shrink:0">
+    <div style="display:flex;gap:3px" id="wiz-steps-bar"></div>
+  </div>
+  <!-- Content area -->
+  <div class="mgr-scroll" id="mgr-scroll">
+    <div id="mgr-form"></div>
+  </div>
+  <!-- Bottom nav -->
+  <div style="background:var(--bg2);border-top:1px solid var(--bd);padding:12px 16px;display:flex;gap:10px;flex-shrink:0">
+    <button id="wiz-prev-btn" onclick="wizPrev()" style="flex:1;padding:13px;border-radius:var(--r2);background:var(--bg3);color:var(--tx2);font-size:14px;font-weight:600;border:1.5px solid var(--bd);cursor:pointer;font-family:var(--f);display:none">← Precedent</button>
+    <button id="wiz-next-btn" onclick="wizNext()" style="flex:2;padding:14px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">Suivant →</button>
+  </div>
 </div>
 
 <!-- SUCCESS -->
@@ -434,6 +454,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--tx);-webkit-font-smoo
       <div class="shop-list-card"><div class="shop-list-h">34 Points de vente</div><div id="shop-list"></div></div>
     </div>
     <div class="pg" id="pg-stats"><div id="stc"><div class="spinner"></div></div></div>
+    <div class="pg" id="pg-shops">
+      <div id="shops-content"></div>
+    </div>
+    <div class="pg" id="pg-planning">
+      <div id="planning-content"></div>
+    </div>
     <div class="pg" id="pg-chat">
       <div class="chat-wrap">
         <div class="chat-msgs" id="chat-msgs">
@@ -462,6 +488,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--tx);-webkit-font-smoo
     <button class="tab" onclick="sw('notes',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Notes</button>
     <button class="tab" onclick="sw('map',this)"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Carte</button>
     <button class="tab" onclick="sw('stats',this)"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Stats</button>
+    <button class="tab" onclick="sw('shops',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Magasins</button>
+    <button class="tab" onclick="sw('planning',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Planning</button>
     <button class="tab" onclick="sw('chat',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chat</button>
   </div>
 </div>
@@ -576,162 +604,269 @@ function showPwd(){var b=document.getElementById('pwd-wrap');b.classList.toggle(
 function checkPwd(){if(document.getElementById('pwd-in').value===PWD){document.getElementById('pwd-err').style.display='none';document.getElementById('pwd-in').value='';document.getElementById('pwd-wrap').classList.remove('on');sessionStorage.setItem('g_auth','1');showSc('app');loadH();}else{document.getElementById('pwd-err').style.display='block';document.getElementById('pwd-in').value='';}}
 
 // ============ NOUVEAU QUESTIONNAIRE ============
+
+// ── WIZARD STATE ──
+var wizStep = 0; // 0=info, 1-7=sections, 8=synthese
+
+// Total steps: 1 info + 7 sections + 1 synthese = 9
+function wizTotalSteps(){ return 1 + SECTIONS.length + 1; }
+
 function buildMgr(){
   mgrRatings={};mgrComments={};
   SECTIONS.forEach(function(s){s.questions.forEach(function(q){mgrRatings[q.id]=0;mgrComments[q.id]='';});});
+  wizStep=0;
+  renderWizStep();
+}
 
-  var progressHtml='<div class="progress-bar-wrap">'
-    +'<div class="progress-header"><span class="progress-label">Progression</span><span class="progress-score" id="prog-score">0/3 — --</span></div>'
-    +'<div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>'
-    +'<div class="section-pills" id="section-pills">'
-    +SECTIONS.map(function(s){return'<button class="section-pill sp-empty" id="pill-'+s.id+'" onclick="scrollToSection(\''+s.id+'\')">'+s.icon+' '+s.label.split(' ')[0]+'</button>';}).join('')
-    +'</div></div>';
+function renderWizStep(){
+  var total=wizTotalSteps();
+  // Update top counter
+  var counter=document.getElementById('wiz-counter');
+  if(counter)counter.textContent=(wizStep+1)+' / '+total;
+  // Update steps bar
+  var bar=document.getElementById('wiz-steps-bar');
+  if(bar){
+    var html='';
+    for(var i=0;i<total;i++){
+      var col=i<wizStep?'var(--ok)':i===wizStep?'var(--or)':'rgba(200,134,10,.2)';
+      html+='<div style="flex:1;height:3px;border-radius:2px;background:'+col+';transition:background .3s"></div>';
+    }
+    bar.innerHTML=html;
+  }
+  // Show/hide prev/next buttons
+  var prev=document.getElementById('wiz-prev-btn');
+  var next=document.getElementById('wiz-next-btn');
+  var backBtn=document.getElementById('wiz-back-btn');
+  if(prev)prev.style.display=wizStep>0?'':'none';
+  if(backBtn)backBtn.textContent=wizStep===0?'← Retour':'← Retour';
 
-  var infoHtml='<div class="info-card"><div class="info-card-title">Informations de la visite</div>'
-    +'<div class="f1"><label>Boutique *</label><select id="mb">'+SOPTS+'</select></div>'
-    +'<div class="f2">'
-    +'<div class="f1"><label>Date</label><input type="date" id="md" value="'+new Date().toISOString().split('T')[0]+'"/></div>'
-    +'<div class="f1"><label>Heure</label><input type="time" id="mh" value="'+new Date().toTimeString().slice(0,5)+'"/></div>'
-    +'</div>'
-    +'<div class="f2">'
-    +'<div class="f1"><label>Votre nom</label><input type="text" id="mn" placeholder="Prenom"/></div>'
-    +'<div class="f1"><label>Creneau</label><select id="mc"><option value="matin">Matin (7h-12h)</option><option value="midi">Midi (12h-14h)</option><option value="apm">Apres-midi (14h-18h)</option><option value="soir">Soir (18h+)</option></select></div>'
-    +'</div></div>';
+  // Render content
+  var form=document.getElementById('mgr-form');
+  var scroll=document.getElementById('mgr-scroll');
+  if(scroll)scroll.scrollTop=0;
 
-  var sectionsHtml=SECTIONS.map(function(s,si){
-    var qs=s.questions.map(function(q){
-      return'<div class="crit-item">'
-        +'<div class="crit-question">'+q.q+'</div>'
-        +'<div class="crit-tip">'+q.tip+'</div>'
-        +'<div class="note-btns">'
-        +'<div class="note-btn" id="nb-'+q.id+'-1" onclick="rate(\''+q.id+'\',1)">'
-        +'<span class="nb-emoji">😟</span><span class="nb-label">A ameliorer</span></div>'
-        +'<div class="note-btn" id="nb-'+q.id+'-2" onclick="rate(\''+q.id+'\',2)">'
-        +'<span class="nb-emoji">😐</span><span class="nb-label">Correct</span></div>'
-        +'<div class="note-btn" id="nb-'+q.id+'-3" onclick="rate(\''+q.id+'\',3)">'
-        +'<span class="nb-emoji">😊</span><span class="nb-label">Excellent</span></div>'
-        +'</div>'
-        +'<div class="crit-comment-toggle" onclick="toggleComment(\''+q.id+'\')">✏️ Ajouter un commentaire</div>'
-        +'<div class="crit-comment" id="comm-'+q.id+'"><textarea placeholder="Commentaire optionnel..." oninput="saveComment(\''+q.id+'\',this.value)"></textarea></div>'
-        +'</div>';
-    }).join('');
-    return'<div class="audit-section" id="sec-'+s.id+'">'
-      +'<div class="audit-section-header" onclick="toggleSection(\''+s.id+'\')">'
-      +'<div class="ash-top">'
-      +'<div class="ash-icon" style="background:'+s.bg+'">'+s.icon+'</div>'
-      +'<div class="ash-info"><div class="ash-name">'+s.label+'</div><div class="ash-desc">'+s.desc+'</div></div>'
-      +'<div class="ash-right"><span class="section-score-badge ssb-empty" id="ssb-'+s.id+'">0/'+s.questions.length+'</span><span class="chevron" id="chev-'+s.id+'">›</span></div>'
+  if(wizStep===0){
+    // ── ETAPE 0 : INFOS ──
+    document.getElementById('wiz-section-title').textContent='Informations';
+    document.getElementById('wiz-section-sub').textContent='Boutique visitee, date, heure';
+    if(next){next.textContent='Commencer l audit →';next.style.background='var(--br)';}
+    form.innerHTML=
+      '<div style="padding:8px 0">'
+      +'<div style="background:var(--or-pale);border:1px solid var(--or-bdr);border-radius:var(--r2);padding:16px;margin-bottom:20px;text-align:center">'
+      +'<div style="font-size:28px;margin-bottom:8px">📋</div>'
+      +'<div style="font-size:15px;font-weight:700;color:var(--br);margin-bottom:4px">Audit Qualite Galzin</div>'
+      +'<div style="font-size:13px;color:var(--tx2)">Merci de repondre honnêtement.<br>Vos retours aident a ameliorer nos boutiques.</div>'
       +'</div>'
-      +'<div class="section-progress"><div class="section-progress-fill" id="spf-'+s.id+'" style="width:0%;background:'+s.color+'"></div></div>'
+      +'<div class="f1"><label>Boutique visitee *</label><select id="mb" style="font-size:15px">'+SOPTS+'</select></div>'
+      +'<div class="f2" style="margin-top:12px">'
+      +'<div class="f1"><label>Date</label><input type="date" id="md" value="'+new Date().toISOString().split('T')[0]+'"/></div>'
+      +'<div class="f1"><label>Heure</label><input type="time" id="mh" value="'+new Date().toTimeString().slice(0,5)+'"/></div>'
       +'</div>'
-      +'<div class="section-body" id="sbody-'+s.id+'">'+qs+'</div>'
+      +'<div class="f2" style="margin-top:12px">'
+      +'<div class="f1"><label>Votre nom</label><input type="text" id="mn" placeholder="Prenom"/></div>'
+      +'<div class="f1"><label>Creneau</label><select id="mc"><option value="matin">Matin (7h-12h)</option><option value="midi">Midi (12h-14h)</option><option value="apm">Apres-midi (14h-18h)</option><option value="soir">Soir (18h+)</option></select></div>'
+      +'</div>'
       +'</div>';
-  }).join('');
 
-  var summaryHtml='<div class="summary-card" id="summary-card">'
-    +'<div class="info-card-title">Recapitulatif</div>'
-    +'<div class="summary-grid" id="summary-kpis"></div>'
-    +'<div id="summary-sections"></div>'
-    +'</div>'
-    +'<div class="info-card"><div class="info-card-title">Synthese globale</div>'
-    +'<div class="f1"><label>Points forts de la visite</label><textarea id="mo-pos" placeholder="Ce qui a marque positivement..."></textarea></div>'
-    +'<div class="f1"><label>Points a ameliorer en priorite</label><textarea id="mo-neg" placeholder="Actions a mener rapidement..."></textarea></div>'
-    +'<div class="f1"><label>Observations libres</label><textarea id="mo-lib" placeholder="Tout ce qui vous semble pertinent..."></textarea></div>'
-    +'</div>'
-    +'<button class="submit-btn" onclick="submitMgr()">Envoyer l audit ✓</button>'
-    +'<button class="can-btn" onclick="goHome()">Annuler</button>';
+  } else if(wizStep<=SECTIONS.length){
+    // ── ETAPES 1-7 : SECTIONS ──
+    var s=SECTIONS[wizStep-1];
+    document.getElementById('wiz-section-title').textContent=s.label;
+    document.getElementById('wiz-section-sub').textContent=s.desc;
+    var isLast=(wizStep===SECTIONS.length);
+    if(next){next.textContent=isLast?'Voir le recapitulatif →':'Section suivante →';next.style.background='var(--br)';}
+    
+    // Completion for this section
+    var qids=s.questions.map(function(q){return q.id;});
+    var filled=qids.filter(function(id){return mgrRatings[id]>0;}).length;
+    var pct=Math.round(filled/qids.length*100);
 
-  document.getElementById('mgr-form').innerHTML=progressHtml+infoHtml+sectionsHtml+summaryHtml;
-  // Auto-open first section
-  toggleSection(SECTIONS[0].id);
-  updateProgress();
+    var html='<div style="padding:4px 0">';
+    // Section header card
+    html+='<div style="background:'+s.bg+';border:1px solid '+s.color+'22;border-radius:var(--r3);padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">'
+      +'<div style="width:52px;height:52px;border-radius:14px;background:'+s.bg+';border:2px solid '+s.color+'44;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">'+s.icon+'</div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:16px;font-weight:700;color:var(--tx)">'+s.label+'</div>'
+      +'<div style="font-size:12px;color:var(--tx3);margin-top:2px">'+s.desc+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:8px">'
+      +'<div style="flex:1;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+s.color+';border-radius:2px;transition:width .3s"></div></div>'
+      +'<span style="font-size:10px;color:'+s.color+';font-weight:700">'+filled+'/'+qids.length+'</span>'
+      +'</div>'
+      +'</div></div>';
+
+    // Questions — une par une avec grand espace
+    s.questions.forEach(function(q,qi){
+      var val=mgrRatings[q.id];
+      html+='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r3);padding:18px;margin-bottom:12px" id="qcard-'+q.id+'">'
+        // Numero question
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:'+s.color+';margin-bottom:8px">Question '+(qi+1)+' / '+qids.length+'</div>'
+        // Question
+        +'<div style="font-size:15px;font-weight:600;color:var(--tx);line-height:1.4;margin-bottom:6px">'+q.q+'</div>'
+        // Conseil
+        +'<div style="font-size:12px;color:var(--tx3);line-height:1.5;margin-bottom:14px;padding:8px 12px;background:var(--bg3);border-radius:var(--r);border-left:3px solid var(--bd)">💡 '+q.tip+'</div>'
+        // Boutons note /3 — grands et lisibles
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
+        +'<div onclick="mgrRate(\''+q.id+'\',1)" style="border:2px solid '+(val===1?'var(--er)':'var(--bd)')+';background:'+(val===1?'var(--er-bg)':'var(--bg3)')+';border-radius:var(--r2);padding:14px 8px;text-align:center;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent" id="nb-'+q.id+'-1">'
+        +'<div style="font-size:28px;margin-bottom:5px">😟</div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+(val===1?'var(--er)':'var(--tx3)')+'">A ameliorer</div>'
+        +'</div>'
+        +'<div onclick="mgrRate(\''+q.id+'\',2)" style="border:2px solid '+(val===2?'var(--wa)':'var(--bd)')+';background:'+(val===2?'var(--wa-bg)':'var(--bg3)')+';border-radius:var(--r2);padding:14px 8px;text-align:center;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent" id="nb-'+q.id+'-2">'
+        +'<div style="font-size:28px;margin-bottom:5px">😐</div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+(val===2?'var(--wa)':'var(--tx3)')+'">Correct</div>'
+        +'</div>'
+        +'<div onclick="mgrRate(\''+q.id+'\',3)" style="border:2px solid '+(val===3?'var(--ok)':'var(--bd)')+';background:'+(val===3?'var(--ok-bg)':'var(--bg3)')+';border-radius:var(--r2);padding:14px 8px;text-align:center;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent" id="nb-'+q.id+'-3">'
+        +'<div style="font-size:28px;margin-bottom:5px">😊</div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+(val===3?'var(--ok)':'var(--tx3)')+'">Excellent</div>'
+        +'</div>'
+        +'</div>'
+        // Commentaire optionnel
+        +'<div style="margin-top:12px">'
+        +'<div onclick="toggleWizComment(\''+q.id+'\')" style="font-size:12px;color:var(--or);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px">✏️ Ajouter un commentaire</div>'
+        +'<div id="wc-'+q.id+'" style="display:none;margin-top:8px"><textarea placeholder="Commentaire optionnel..." style="width:100%;padding:10px 12px;border:1.5px solid var(--bd);border-radius:var(--r);font-size:13px;background:var(--bg3);font-family:var(--f);color:var(--tx);outline:none;resize:none;min-height:60px" oninput="mgrComments[\''+q.id+'\']=this.value">'+(mgrComments[q.id]||'')+'</textarea></div>'
+        +'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+    form.innerHTML=html;
+
+  } else {
+    // ── ETAPE SYNTHESE ──
+    document.getElementById('wiz-section-title').textContent='Synthese & envoi';
+    document.getElementById('wiz-section-sub').textContent='Verifiez avant d envoyer';
+    if(next){next.textContent='Envoyer l audit ✓';next.style.background='var(--ok)';}
+
+    var allQ=[];SECTIONS.forEach(function(s){s.questions.forEach(function(q){allQ.push(q.id);});});
+    var vals=allQ.map(function(id){return mgrRatings[id]||0;}).filter(function(v){return v>0;});
+    var avg3=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
+    var avg5=avg3/3*5;
+    var col=avg5>=4?'var(--ok)':avg5>=3?'var(--wa)':'var(--er)';
+    var bg=avg5>=4?'var(--ok-bg)':avg5>=3?'var(--wa-bg)':'var(--er-bg)';
+    var lbl=avg5>=4?'Excellent':avg5>=3?'Bon':avg5>=2?'Passable':'Insuffisant';
+
+    var html='<div style="padding:4px 0">';
+    // Score global hero
+    html+='<div style="background:'+bg+';border-radius:var(--r3);padding:24px;text-align:center;margin-bottom:16px">'
+      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:8px">Score global</div>'
+      +'<div style="font-size:56px;font-weight:700;color:'+col+';line-height:1">'+avg5.toFixed(1)+'<span style="font-size:20px;font-weight:300">/5</span></div>'
+      +'<div style="font-size:14px;font-weight:600;color:'+col+';margin-top:4px">'+lbl+'</div>'
+      +'<div style="font-size:12px;color:var(--tx3);margin-top:6px">'+vals.length+' / '+allQ.length+' criteres evalues</div>'
+      +'</div>';
+
+    // Scores par section
+    html+='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:12px">Scores par section</div>';
+    SECTIONS.forEach(function(s){
+      var qids=s.questions.map(function(q){return q.id;});
+      var sv=qids.filter(function(id){return mgrRatings[id]>0;}).map(function(id){return mgrRatings[id];});
+      var sa=sv.length?sv.reduce(function(a,b){return a+b;},0)/sv.length:0;
+      var sc=sa>=2.5?'var(--ok)':sa>=1.5?'var(--wa)':sa>0?'var(--er)':'var(--tx3)';
+      var pct=sa>0?Math.round(sa/3*100):0;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bg3)">'
+        +'<span style="font-size:18px;flex-shrink:0">'+s.icon+'</span>'
+        +'<span style="font-size:13px;color:var(--tx2);flex:1">'+s.label.split(' ').slice(0,2).join(' ')+'</span>'
+        +'<div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+sc+';border-radius:3px"></div></div>'
+        +'<span style="font-size:12px;font-weight:700;color:'+sc+';width:28px;text-align:right">'+(sa>0?sa.toFixed(1):'-')+'</span>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    // Champs texte libres
+    html+='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:12px">Synthese ecrite</div>'
+      +'<div class="f1"><label>✅ Points forts de la visite</label><textarea id="mo-pos" placeholder="Ce qui vous a marque positivement..." style="min-height:70px"></textarea></div>'
+      +'<div class="f1" style="margin-top:10px"><label>⚠️ Points a ameliorer en priorite</label><textarea id="mo-neg" placeholder="Actions a mener rapidement..." style="min-height:70px"></textarea></div>'
+      +'<div class="f1" style="margin-top:10px"><label>💬 Observations libres</label><textarea id="mo-lib" placeholder="Tout ce qui vous semble pertinent..." style="min-height:60px"></textarea></div>'
+      +'</div>'
+      +'</div>';
+    form.innerHTML=html;
+  }
 }
 
-function rate(qid,val){
-  mgrRatings[qid]=val;
-  // Update button styles
-  [1,2,3].forEach(function(v){
-    var btn=document.getElementById('nb-'+qid+'-'+v);
-    if(btn){btn.className='note-btn'+(v===val?' sel-'+v:'');}
-  });
-  updateProgress();
-  updateSectionBadge(qid);
-}
-
-function toggleComment(qid){
-  var el=document.getElementById('comm-'+qid);
+function toggleWizComment(qid){
+  var el=document.getElementById('wc-'+qid);
   if(el)el.style.display=el.style.display==='block'?'none':'block';
 }
-function saveComment(qid,val){mgrComments[qid]=val;}
 
-function toggleSection(id){
-  var body=document.getElementById('sbody-'+id);
-  var chev=document.getElementById('chev-'+id);
-  if(!body)return;
-  var isOpen=body.classList.contains('open');
-  body.classList.toggle('open',!isOpen);
-  if(chev)chev.classList.toggle('open',!isOpen);
-}
-
-function scrollToSection(id){
-  var el=document.getElementById('sec-'+id);
-  if(el){el.scrollIntoView({behavior:'smooth',block:'start'});if(!document.getElementById('sbody-'+id).classList.contains('open'))toggleSection(id);}
-}
-
-function updateSectionBadge(qid){
-  // Find which section this question belongs to
-  SECTIONS.forEach(function(s){
-    var qids=s.questions.map(function(q){return q.id;});
-    if(qids.indexOf(qid)===-1)return;
-    var filled=qids.filter(function(id){return mgrRatings[id]>0;}).length;
-    var total=qids.length;
-    var avg=filled>0?qids.filter(function(id){return mgrRatings[id]>0;}).reduce(function(sum,id){return sum+mgrRatings[id];},0)/filled:0;
-    var badge=document.getElementById('ssb-'+s.id);
-    var prog=document.getElementById('spf-'+s.id);
-    if(badge){
-      badge.textContent=filled+'/'+total;
-      badge.className='section-score-badge '+(filled===0?'ssb-empty':avg>=2.5?'ssb-high':avg>=1.5?'ssb-mid':'ssb-low');
+function mgrRate(qid,val){
+  mgrRatings[qid]=val;
+  // Update button styles in place
+  [1,2,3].forEach(function(v){
+    var btn=document.getElementById('nb-'+qid+'-'+v);
+    if(!btn)return;
+    var colors={1:['var(--er-bg)','var(--er)'],2:['var(--wa-bg)','var(--wa)'],3:['var(--ok-bg)','var(--ok)']};
+    if(v===val){
+      btn.style.background=colors[v][0];
+      btn.style.borderColor=colors[v][1];
+      btn.querySelector('div:last-child').style.color=colors[v][1];
+      // Small bounce
+      btn.style.transform='scale(0.95)';
+      setTimeout(function(){btn.style.transform='scale(1)';},120);
+    }else{
+      btn.style.background='var(--bg3)';
+      btn.style.borderColor='var(--bd)';
+      btn.querySelector('div:last-child').style.color='var(--tx3)';
     }
-    if(prog)prog.style.width=Math.round(filled/total*100)+'%';
-    // Update pill
-    var pill=document.getElementById('pill-'+s.id);
-    if(pill)pill.className='section-pill '+(filled===0?'sp-empty':filled===total?'sp-done':'sp-partial');
   });
-}
-
-function updateProgress(){
-  var allQ=[];SECTIONS.forEach(function(s){s.questions.forEach(function(q){allQ.push(q.id);});});
-  var filled=allQ.filter(function(id){return mgrRatings[id]>0;}).length;
-  var total=allQ.length;
-  var vals=allQ.filter(function(id){return mgrRatings[id]>0;}).map(function(id){return mgrRatings[id];});
-  var avg=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
-  var pct=Math.round(filled/total*100);
-  var fill=document.getElementById('prog-fill');if(fill)fill.style.width=pct+'%';
-  var score=document.getElementById('prog-score');if(score)score.textContent=pct+'% • '+(avg>0?avg.toFixed(1)+'/3':'--');
-  // Update summary
-  updateSummary(vals,avg,filled,total);
-}
-
-function updateSummary(vals,avg,filled,total){
-  var kEl=document.getElementById('summary-kpis');
-  if(!kEl)return;
-  var cls=avg>=2.5?'g':avg>=1.5?'w':'b';
-  var col=avg>=2.5?'var(--ok)':avg>=1.5?'var(--wa)':'var(--er)';
-  kEl.innerHTML='<div class="sum-kpi" style="background:'+(avg>=2.5?'var(--ok-bg)':avg>=1.5?'var(--wa-bg)':'var(--er-bg)')+'"><div class="sl" style="color:var(--tx3)">Score global</div><div class="sv '+cls+'" style="color:'+col+'">'+(avg>0?avg.toFixed(1):'-')+'/3</div></div>'
-    +'<div class="sum-kpi"><div class="sl" style="color:var(--tx3)">Completion</div><div class="sv">'+filled+'/'+total+'</div></div>';
-  var secEl=document.getElementById('summary-sections');if(!secEl)return;
-  secEl.innerHTML=SECTIONS.map(function(s){
+  // Update section progress bar in header
+  var s=SECTIONS[wizStep-1];
+  if(s){
     var qids=s.questions.map(function(q){return q.id;});
-    var sv=qids.filter(function(id){return mgrRatings[id]>0;}).map(function(id){return mgrRatings[id];});
-    var sa=sv.length?sv.reduce(function(a,b){return a+b;},0)/sv.length:0;
-    var col=sa>=2.5?'var(--ok)':sa>=1.5?'var(--wa)':sa>0?'var(--er)':'var(--tx3)';
-    return'<div class="sum-section-row">'
-      +'<span style="font-size:16px;flex-shrink:0">'+s.icon+'</span>'
-      +'<span class="sum-sect-name">'+s.label.split(' ').slice(0,2).join(' ')+'</span>'
-      +'<div class="sum-sect-bar"><div class="sum-sect-fill" style="width:'+(sa>0?Math.round(sa/3*100):0)+'%;background:'+col+'"></div></div>'
-      +'<span class="sum-sect-score" style="color:'+col+'">'+(sa>0?sa.toFixed(1):'-')+'</span>'
-      +'</div>';
-  }).join('');
+    var filled=qids.filter(function(id){return mgrRatings[id]>0;}).length;
+    var pct=Math.round(filled/qids.length*100);
+    // Update progress bar inside section header
+    var pbars=document.querySelectorAll('[id^="qcard-"] ~ *');
+    // Simpler: find and update the section bar
+    var secBar=document.querySelector('#mgr-form > div > div:first-child [style*="transition:width"]');
+    if(secBar)secBar.style.width=pct+'%';
+    var secCount=document.querySelector('#mgr-form > div > div:first-child span');
+    if(secCount)secCount.textContent=filled+'/'+qids.length;
+  }
+  // Update global steps bar
+  updateWizStepsBar();
+}
+
+function updateWizStepsBar(){
+  var bar=document.getElementById('wiz-steps-bar');
+  if(!bar)return;
+  var total=wizTotalSteps();
+  var html='';
+  for(var i=0;i<total;i++){
+    var col;
+    if(i===0){col=wizStep>0?'var(--ok)':'var(--or)';}
+    else if(i<=SECTIONS.length){
+      if(i<wizStep){col='var(--ok)';}
+      else if(i===wizStep){col='var(--or)';}
+      else{col='rgba(200,134,10,.2)';}
+    }else{col=wizStep>=total-1?'var(--or)':'rgba(200,134,10,.2)';}
+    html+='<div style="flex:1;height:3px;border-radius:2px;background:'+col+';transition:background .3s"></div>';
+  }
+  bar.innerHTML=html;
+}
+
+function wizBack(){
+  if(wizStep===0){goHome();}else{wizPrev();}
+}
+
+function wizPrev(){
+  if(wizStep>0){wizStep--;renderWizStep();}
+}
+
+function wizNext(){
+  var total=wizTotalSteps();
+  if(wizStep===0){
+    // Validate boutique
+    var b=document.getElementById('mb');
+    if(!b||!b.value){showToast('Choisis une boutique');return;}
+    wizStep++;renderWizStep();
+  } else if(wizStep<SECTIONS.length){
+    wizStep++;renderWizStep();
+  } else if(wizStep===SECTIONS.length){
+    // Go to synthese
+    wizStep++;renderWizStep();
+  } else {
+    // Submit
+    submitMgr();
+  }
 }
 
 function getCriteriaAvg(sectionId){
@@ -741,31 +876,28 @@ function getCriteriaAvg(sectionId){
 }
 
 async function submitMgr(){
-  var b=document.getElementById('mb').value;if(!b){showToast('Choisis une boutique');return;}
+  var b=document.getElementById('mb')?document.getElementById('mb').value:'';
+  if(!b){showToast('Boutique manquante');wizStep=0;renderWizStep();return;}
   var allQ=[];SECTIONS.forEach(function(s){s.questions.forEach(function(q){allQ.push(q.id);});});
   var vals=allQ.map(function(id){return mgrRatings[id]||0;}).filter(function(v){return v>0;});
-  if(vals.length<5){showToast('Remplis au moins quelques criteres');return;}
-  var avg3=vals.reduce(function(a,b){return a+b;},0)/vals.length;
-  var avg5=avg3/3*5;// Convert /3 to /5 for Supabase
-  var secAvgs=SECTIONS.map(function(s){return{id:s.id,avg:getCriteriaAvg(s.id)};});
-  // Map sections to existing DB columns (keep backward compat)
-  var vitrineAvg=secAvgs.find(function(x){return x.id==='vitrine';}).avg/3*5;
-  var accueilAvg=((secAvgs.find(function(x){return x.id==='savoir_etre';}).avg+secAvgs.find(function(x){return x.id==='fidelisation';}).avg)/2)/3*5;
-  var produitsAvg=secAvgs.find(function(x){return x.id==='produits';}).avg/3*5;
-  var espaceAvg=secAvgs.find(function(x){return x.id==='proprete';}).avg/3*5;
-  var digitalAvg=secAvgs.find(function(x){return x.id==='digital';}).avg/3*5;
-  // Trouver point fort et point faible
-  var sorted=secAvgs.filter(function(x){return x.avg>0;}).sort(function(a,b){return a.avg-b.avg;});
-  var getSLabel=function(id){return SECTIONS.find(function(s){return s.id===id;})||{label:id};};
-  var dateVal=document.getElementById('md').value||new Date().toISOString().split('T')[0];
-  var heureVal=document.getElementById('mh').value||'';
-  var dateAudit=heureVal?dateVal+'T'+heureVal:dateVal;
-  var obs=[document.getElementById('mo-pos').value,document.getElementById('mo-neg').value,document.getElementById('mo-lib').value].filter(Boolean).join('\n\n---\n\n');
-  // Add section comments
+  var avg3=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length:0;
+  var avg5=avg3/3*5;
+  var ca=SECTIONS.map(function(s){return getCriteriaAvg(s.id);});
+  var secSorted=SECTIONS.map(function(s,i){return{id:s.id,label:s.label,score:getCriteriaAvg(s.id)};}).filter(function(x){return x.score>0;}).sort(function(a,b){return a.score-b.score;});
+  var vitrineAvg=getCriteriaAvg('vitrine')/3*5;
+  var accueilAvg=((getCriteriaAvg('savoir_etre')+getCriteriaAvg('fidelisation'))/2)/3*5;
+  var produitsAvg=getCriteriaAvg('produits')/3*5;
+  var espaceAvg=getCriteriaAvg('proprete')/3*5;
+  var digitalAvg=getCriteriaAvg('digital')/3*5;
+  var dateVal=document.getElementById('md')?document.getElementById('md').value:new Date().toISOString().split('T')[0];
+  var posEl=document.getElementById('mo-pos');
+  var negEl=document.getElementById('mo-neg');
+  var libEl=document.getElementById('mo-lib');
+  var obs=[posEl?posEl.value:'',negEl?negEl.value:'',libEl?libEl.value:''].filter(Boolean).join('\n\n---\n\n');
   var commentaires=Object.entries(mgrComments).filter(function(e){return e[1];}).map(function(e){var q=null;SECTIONS.forEach(function(s){s.questions.forEach(function(q2){if(q2.id===e[0])q=q2;});});return(q?q.q:e[0])+': '+e[1];}).join('\n');
   if(commentaires)obs=(obs?obs+'\n\n---\n\n':'')+commentaires;
-  var creneau=document.getElementById('mc').value||'';
-  var p={boutique:b,date_audit:dateVal,score_global:parseFloat(avg5.toFixed(1)),statut:avg5>=4?'Bon':avg5>=3?'Moyen':'A ameliorer',vitrine:parseFloat(vitrineAvg.toFixed(1))||null,accueil:parseFloat(accueilAvg.toFixed(1))||null,produits:parseFloat(produitsAvg.toFixed(1))||null,espace_interieur:parseFloat(espaceAvg.toFixed(1))||null,digital:parseFloat(digitalAvg.toFixed(1))||null,point_faible:sorted[0]?getSLabel(sorted[0].id).label:null,point_fort:sorted[sorted.length-1]?getSLabel(sorted[sorted.length-1].id).label:null,observations:obs||null,actions:document.getElementById('mo-neg').value||null,audite_par:document.getElementById('mn').value||'Manager'};
+  var mnEl=document.getElementById('mn');
+  var p={boutique:b,date_audit:dateVal,score_global:parseFloat(avg5.toFixed(1)),statut:avg5>=4?'Bon':avg5>=3?'Moyen':'A ameliorer',vitrine:parseFloat(vitrineAvg.toFixed(1))||null,accueil:parseFloat(accueilAvg.toFixed(1))||null,produits:parseFloat(produitsAvg.toFixed(1))||null,espace_interieur:parseFloat(espaceAvg.toFixed(1))||null,digital:parseFloat(digitalAvg.toFixed(1))||null,point_faible:secSorted[0]?secSorted[0].label:null,point_fort:secSorted[secSorted.length-1]?secSorted[secSorted.length-1].label:null,observations:obs||null,actions:negEl?negEl.value||null:null,audite_par:mnEl?mnEl.value||'Manager':'Manager'};
   try{await api('POST','audits',p);showSc('sc-ok');}catch(e){showToast('Erreur de connexion');}
 }
 
@@ -844,8 +976,525 @@ function scrollChat(){var el=document.getElementById('chat-msgs');if(el)el.scrol
 
 // NAV
 function closePanel(id){document.getElementById(id).classList.remove('open');}
-function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();}
+function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops')loadShops();else if(n==='planning')loadPlanning();}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+
+// ═══════════════════════════════════════════
+// SHOPS (MAGASINS) MODULE
+// ═══════════════════════════════════════════
+
+var currentShopId = null;
+var shopPanel = null;
+
+var SHOP_META = {};  // stores per-shop info: { id, name, manager, phone, email, address, notes[] }
+
+function shopKey(id){ return 'galzin_shop_'+id; }
+function loadShopMeta(id){
+  var s = localStorage.getItem(shopKey(id));
+  return s ? JSON.parse(s) : {id:id,name:SHOPS[id]||id,manager:'',phone:'',email:'',address:'',horaires:'',notes:[]};
+}
+function saveShopMeta(meta){ localStorage.setItem(shopKey(meta.id), JSON.stringify(meta)); }
+
+function loadShops(){
+  var el = document.getElementById('shops-content');
+  if(!el) return;
+  var html = '<div style="margin-bottom:12px"><div style="font-size:13px;color:var(--tx3)">'+SHOPS.length+' boutiques · clique pour ouvrir la fiche</div></div>';
+  // Group by region keyword
+  var groups = {
+    'Millau': [], 'Languedoc': [], 'Littoral / Palavas': [], 'Sud': [],
+    'Le Fournil': [], 'Autre': []
+  };
+  SHOPS.forEach(function(s, i){
+    var su = s.toUpperCase();
+    if(su.indexOf('MILLAU') > -1) groups['Millau'].push({i:i,s:s});
+    else if(su.indexOf('LANGUEDOC') > -1) groups['Languedoc'].push({i:i,s:s});
+    else if(su.indexOf('LITTORAL') > -1 || su.indexOf('PALAV') > -1) groups['Littoral / Palavas'].push({i:i,s:s});
+    else if(su.indexOf(' SUD') > -1) groups['Sud'].push({i:i,s:s});
+    else if(su.indexOf('FOURNIL') > -1) groups['Le Fournil'].push({i:i,s:s});
+    else groups['Autre'].push({i:i,s:s});
+  });
+  Object.keys(groups).forEach(function(grp){
+    if(!groups[grp].length) return;
+    html += '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--or);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bd)">'+grp+'</div>';
+    groups[grp].forEach(function(item){
+      var meta = loadShopMeta(item.i);
+      var auditCount = allA.filter(function(a){return a.boutique===item.s;}).length;
+      var noteCount = meta.notes ? meta.notes.length : 0;
+      // Last audit score
+      var lastAudit = allA.filter(function(a){return a.boutique===item.s;}).sort(function(a,b){return new Date(b.date_audit||0)-new Date(a.date_audit||0);})[0];
+      var scoreHtml = '';
+      if(lastAudit){
+        var sc = parseFloat(lastAudit.score_global)||0;
+        var sc_col = sc>=4?'var(--ok)':sc>=3?'var(--wa)':'var(--er)';
+        scoreHtml = '<span style="font-size:11px;font-weight:700;color:'+sc_col+';padding:2px 7px;border-radius:10px;background:'+(sc>=4?'var(--ok-bg)':sc>=3?'var(--wa-bg)':'var(--er-bg)')+'">'+sc+'/5</span>';
+      }
+      html += '<div onclick="openShop('+item.i+')" style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s" onmouseenter="this.style.borderColor=\'var(--or)\';" onmouseleave="this.style.borderColor=\'var(--bd)\'">'
+        + '<div style="width:40px;height:40px;border-radius:10px;background:var(--or-pale);border:1px solid var(--or-bdr);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏪</div>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.s+'</div>'
+        + '<div style="font-size:11px;color:var(--tx3);margin-top:2px;display:flex;gap:10px">'
+        + (auditCount ? '<span>📋 '+auditCount+' audit'+(auditCount>1?'s':'')+'</span>' : '<span style="color:var(--bd)">Aucun audit</span>')
+        + (noteCount ? '<span>📝 '+noteCount+' note'+(noteCount>1?'s':'')+'</span>' : '')
+        + (meta.manager ? '<span>👤 '+meta.manager+'</span>' : '')
+        + '</div></div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">'+scoreHtml+'<span style="font-size:16px;color:var(--tx3)">›</span></div>'
+        + '</div>';
+    });
+  });
+  el.innerHTML = html;
+}
+
+function openShop(shopIdx){
+  currentShopId = shopIdx;
+  // Build slide panel
+  var existing = document.getElementById('shop-panel');
+  if(existing) existing.remove();
+  var panel = document.createElement('div');
+  panel.id = 'shop-panel';
+  panel.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)';
+  document.body.appendChild(panel);
+  renderShopPanel(shopIdx, panel);
+  requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+}
+
+function closeShopPanel(){
+  var p = document.getElementById('shop-panel');
+  if(p){ p.style.transform='translateX(100%)'; setTimeout(function(){p.remove();},300); }
+  loadShops(); // refresh list
+}
+
+function renderShopPanel(idx, panel){
+  var meta = loadShopMeta(idx);
+  var shopName = SHOPS[idx];
+  var shopAudits = allA.filter(function(a){return a.boutique===shopName;}).sort(function(a,b){return new Date(b.date_audit||0)-new Date(a.date_audit||0);});
+  
+  panel.innerHTML = 
+    // TOPBAR
+    '<div style="background:var(--br);border-bottom:2px solid var(--or);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">'
+    + '<button onclick="closeShopPanel()" style="background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.25);border-radius:var(--r);padding:7px 13px;color:#FFF8E8;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)">← Retour</button>'
+    + '<span style="font-size:14px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#FFF8E8">'+shopName+'</span>'
+    + '<button onclick="saveShopInfo('+idx+')" style="font-size:13px;font-weight:700;color:var(--or);padding:7px 13px;border:1px solid rgba(200,134,10,.4);border-radius:var(--r);background:rgba(200,134,10,.1);cursor:pointer;font-family:var(--f)" id="shop-save-btn">Sauvegarder</button>'
+    + '</div>'
+    // SHOP TABS
+    + '<div style="display:flex;background:var(--bg2);border-bottom:1px solid var(--bd)">'
+    + '<button onclick="shopTab(\'info\')" id="stab-info" style="flex:1;padding:11px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--or);border-bottom:2px solid var(--or);font-family:var(--f)">Infos</button>'
+    + '<button onclick="shopTab(\'notes\')" id="stab-notes" style="flex:1;padding:11px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--tx3);border-bottom:2px solid transparent;font-family:var(--f)">Notes</button>'
+    + '<button onclick="shopTab(\'audits\')" id="stab-audits" style="flex:1;padding:11px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--tx3);border-bottom:2px solid transparent;font-family:var(--f)">Audits ('+shopAudits.length+')</button>'
+    + '</div>'
+    + '<div id="shop-tab-content" style="padding:16px"></div>';
+
+  shopTabRender('info', idx, meta, shopAudits);
+}
+
+function shopTab(tab){
+  ['info','notes','audits'].forEach(function(t){
+    var btn = document.getElementById('stab-'+t);
+    if(btn){ btn.style.color = t===tab?'var(--or)':'var(--tx3)'; btn.style.borderBottom = t===tab?'2px solid var(--or)':'2px solid transparent'; }
+  });
+  var meta = loadShopMeta(currentShopId);
+  var shopName = SHOPS[currentShopId];
+  var audits = allA.filter(function(a){return a.boutique===shopName;}).sort(function(a,b){return new Date(b.date_audit||0)-new Date(a.date_audit||0);});
+  shopTabRender(tab, currentShopId, meta, audits);
+}
+
+function shopTabRender(tab, idx, meta, audits){
+  var el = document.getElementById('shop-tab-content');
+  if(!el) return;
+
+  if(tab==='info'){
+    document.getElementById('shop-save-btn').style.display='';
+    el.innerHTML = 
+      '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:12px">'
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:12px">Informations boutique</div>'
+      + '<div class="mf-g"><label>Responsable / Manager</label><input type="text" id="si-manager" value="'+(meta.manager||'')+'" placeholder="Nom du responsable"/></div>'
+      + '<div class="mf-g"><label>Telephone</label><input type="tel" id="si-phone" value="'+(meta.phone||'')+'" placeholder="06 xx xx xx xx"/></div>'
+      + '<div class="mf-g"><label>Email</label><input type="email" id="si-email" value="'+(meta.email||'')+'" placeholder="boutique@galzin.fr"/></div>'
+      + '<div class="mf-g"><label>Adresse</label><input type="text" id="si-address" value="'+(meta.address||'')+'" placeholder="Adresse complete"/></div>'
+      + '<div class="mf-g"><label>Horaires</label><textarea id="si-horaires" placeholder="Lun-Ven 7h-19h30...">'+(meta.horaires||'')+'</textarea></div>'
+      + '</div>'
+      // Stats rapides
+      + '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:12px">'
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:12px">Statistiques rapides</div>';
+    if(audits.length){
+      var scores = audits.map(function(a){return parseFloat(a.score_global)||0;}).filter(function(v){return v>0;});
+      var avg = scores.reduce(function(a,b){return a+b;},0)/scores.length;
+      var col = avg>=4?'var(--ok)':avg>=3?'var(--wa)':'var(--er)';
+      el.innerHTML += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+        + '<div style="background:var(--bg3);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Audits</div><div style="font-size:22px;font-weight:700">'+audits.length+'</div></div>'
+        + '<div style="background:var(--bg3);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Moyenne</div><div style="font-size:22px;font-weight:700;color:'+col+'">'+avg.toFixed(1)+'/5</div></div>'
+        + '</div>';
+    } else {
+      el.innerHTML += '<div style="font-size:13px;color:var(--tx3)">Aucun audit pour cette boutique.</div>';
+    }
+    el.innerHTML += '</div>';
+    // Close info div
+    el.innerHTML += '';
+
+  } else if(tab==='notes'){
+    document.getElementById('shop-save-btn').style.display='none';
+    var notes = meta.notes || [];
+    var html = 
+      // Bouton nouvelle note
+      '<div style="display:flex;justify-content:flex-end;margin-bottom:12px">'
+      + '<button onclick="newShopNote('+idx+')" style="display:flex;align-items:center;gap:5px;padding:9px 16px;background:var(--br);color:var(--or);border:1px solid rgba(200,134,10,.3);border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Nouvelle note</button>'
+      + '</div>';
+    if(!notes.length){
+      html += '<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:14px;line-height:1.7">📝 Aucune note pour cette boutique.<br>Commence par en ajouter une !</div>';
+    } else {
+      notes.slice().reverse().forEach(function(n,ri){
+        var realIdx = notes.length - 1 - ri;
+        html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:8px;cursor:pointer" onclick="openShopNote('+idx+','+realIdx+')">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+          + '<span style="font-size:13px;font-weight:700;color:var(--tx)">'+n.title+'</span>'
+          + '<span style="font-size:11px;color:var(--tx3)">'+n.date+'</span>'
+          + '</div>'
+          + '<div style="font-size:12px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(n.body?n.body.substring(0,80):'')+'</div>'
+          + (n.flags&&n.flags.length?'<div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap">'+n.flags.map(function(f){return'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--er-bg);color:var(--er);font-weight:600">⚠️ '+f+'</span>';}).join('')+'</div>':'')
+          + '</div>';
+      });
+    }
+    el.innerHTML = html;
+
+  } else if(tab==='audits'){
+    document.getElementById('shop-save-btn').style.display='none';
+    if(!audits.length){
+      el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:14px;line-height:1.7">Aucun audit enregistre pour cette boutique.</div>';
+      return;
+    }
+    var html='<div style="font-size:12px;color:var(--tx3);margin-bottom:10px">'+audits.length+' audit'+(audits.length>1?'s':'')+'</div>';
+    audits.forEach(function(a){
+      var sc=parseFloat(a.score_global)||0;var bc=sc>=4?'chip-g':sc>=3?'chip-w':'chip-b';var lbl=sc>=4?'Bon':sc>=3?'Moyen':'A ameliorer';var col=sc>=4?'var(--ok)':sc>=3?'var(--wa)':'var(--er)';
+      html+='<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px;margin-bottom:8px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:var(--tx3)">'+(a.date_audit||'--')+(a.audite_par?' · 👤 '+a.audite_par:'')+'</span><span class="chip '+bc+'">'+lbl+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.round(sc/5*100)+'%;background:'+col+';border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:'+col+'">'+sc+'/5</span></div>'
+        +(a.point_fort?'<div style="margin-top:6px;font-size:11px;color:var(--ok)">✅ '+a.point_fort+'</div>':'')
+        +(a.point_faible?'<div style="margin-top:2px;font-size:11px;color:var(--er)">⚠️ '+a.point_faible+'</div>':'')
+        +'</div>';
+    });
+    el.innerHTML=html;
+  }
+}
+
+function saveShopInfo(idx){
+  var meta = loadShopMeta(idx);
+  var fields = ['manager','phone','email','address','horaires'];
+  fields.forEach(function(f){
+    var el=document.getElementById('si-'+f);
+    if(el) meta[f]=el.value||'';
+  });
+  saveShopMeta(meta);
+  showToast('Infos sauvegardees !');
+}
+
+function newShopNote(idx){
+  var meta = loadShopMeta(idx);
+  // Open note editor
+  var panel = document.getElementById('shop-panel');
+  if(!panel) return;
+  var el = document.getElementById('shop-tab-content');
+  var today = new Date().toLocaleDateString('fr-FR');
+  el.innerHTML = 
+    '<div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">'
+    + '<button onclick="shopTab(\'notes\')" style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;color:var(--tx2);font-family:var(--f)">← Retour</button>'
+    + '<div style="font-size:12px;color:var(--tx3)">'+today+'</div>'
+    + '</div>'
+    + '<input type="text" id="snote-title" placeholder="Titre de la note..." value="Note du '+today+'" style="width:100%;padding:12px 14px;border:1.5px solid var(--bd);border-radius:var(--r2);font-size:17px;font-weight:700;background:var(--bg);font-family:var(--f);color:var(--tx);outline:none;margin-bottom:14px"/>'
+    // Questions guidees
+    + '<div style="background:var(--or-pale);border:1px solid var(--or-bdr);border-radius:var(--r2);padding:14px;margin-bottom:14px">'
+    + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--or);margin-bottom:10px">Questions de suivi</div>'
+    + '<div style="display:flex;flex-direction:column;gap:8px">'
+    + shopNoteQuestion('snq1','As-tu constate une baisse de frequentation ?')
+    + shopNoteQuestion('snq2','Des problemes de proprete ou d hygiene ?')
+    + shopNoteQuestion('snq3','Des retours clients negatifs recents ?')
+    + shopNoteQuestion('snq4','L equipe est-elle au complet ?')
+    + shopNoteQuestion('snq5','Les produits phares sont-ils bien mis en avant ?')
+    + '</div></div>'
+    + '<textarea id="snote-body" placeholder="Observations libres, points importants, actions a mener..." style="width:100%;padding:13px;border:1.5px solid var(--bd);border-radius:var(--r2);font-size:14px;background:var(--bg);font-family:var(--f);color:var(--tx);outline:none;resize:none;min-height:140px;line-height:1.7;margin-bottom:12px"></textarea>'
+    + '<button onclick="saveShopNote('+idx+')" style="width:100%;padding:14px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">Sauvegarder cette note</button>';
+  document.getElementById('shop-save-btn').style.display='none';
+}
+
+function shopNoteQuestion(id, q){
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
+    + '<span style="font-size:13px;color:var(--tx2);flex:1">'+q+'</span>'
+    + '<div style="display:flex;gap:5px">'
+    + '<button id="'+id+'-y" onclick="snqToggle(\''+id+'\',true)" style="padding:5px 12px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg3);font-size:12px;font-weight:600;cursor:pointer;color:var(--tx3);font-family:var(--f)">Oui</button>'
+    + '<button id="'+id+'-n" onclick="snqToggle(\''+id+'\',false)" style="padding:5px 12px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg3);font-size:12px;font-weight:600;cursor:pointer;color:var(--tx3);font-family:var(--f)">Non</button>'
+    + '</div></div>';
+}
+var snqAnswers = {};
+function snqToggle(id, val){
+  snqAnswers[id] = val;
+  var yb = document.getElementById(id+'-y');
+  var nb = document.getElementById(id+'-n');
+  if(yb&&nb){
+    if(val){yb.style.background='var(--er-bg)';yb.style.borderColor='var(--er)';yb.style.color='var(--er)';nb.style.background='var(--bg3)';nb.style.borderColor='var(--bd)';nb.style.color='var(--tx3)';}
+    else{nb.style.background='var(--ok-bg)';nb.style.borderColor='var(--ok)';nb.style.color='var(--ok)';yb.style.background='var(--bg3)';yb.style.borderColor='var(--bd)';yb.style.color='var(--tx3)';}
+  }
+}
+
+function saveShopNote(idx){
+  var meta = loadShopMeta(idx);
+  var title = document.getElementById('snote-title').value || ('Note du '+new Date().toLocaleDateString('fr-FR'));
+  var body = document.getElementById('snote-body').value || '';
+  // Collect flags from yes answers
+  var QS = {snq1:'Baisse frequentation',snq2:'Probleme proprete',snq3:'Retours negatifs',snq4:'Equipe incomplete',snq5:'Produits mal mis en avant'};
+  var flags = [];
+  Object.keys(QS).forEach(function(k){ if(snqAnswers[k]===true) flags.push(QS[k]); });
+  snqAnswers = {};
+  var note = {title:title, date:new Date().toLocaleDateString('fr-FR'), body:body, flags:flags, created:new Date().toISOString()};
+  if(!meta.notes) meta.notes=[];
+  meta.notes.push(note);
+  saveShopMeta(meta);
+  showToast('Note sauvegardee !');
+  document.getElementById('shop-save-btn').style.display='';
+  shopTab('notes');
+}
+
+function openShopNote(idx, noteIdx){
+  var meta = loadShopMeta(idx);
+  var note = meta.notes[noteIdx];
+  if(!note) return;
+  var el = document.getElementById('shop-tab-content');
+  var QS = {snq1:'Baisse frequentation',snq2:'Probleme proprete',snq3:'Retours negatifs',snq4:'Equipe incomplete',snq5:'Produits mal mis en avant'};
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    + '<button onclick="shopTab(\'notes\')" style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;color:var(--tx2);font-family:var(--f)">← Notes</button>'
+    + '<div style="display:flex;gap:8px"><span style="font-size:11px;color:var(--tx3);align-self:center">'+note.date+'</span><button onclick="deleteShopNote('+idx+','+noteIdx+')" style="padding:6px 12px;border-radius:8px;background:var(--er-bg);border:1px solid rgba(201,32,32,.2);color:var(--er);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">Supprimer</button></div>'
+    + '</div>'
+    + '<div style="font-size:20px;font-weight:700;color:var(--tx);margin-bottom:12px">'+note.title+'</div>'
+    + (note.flags&&note.flags.length?'<div style="background:var(--er-bg);border:1px solid rgba(201,32,32,.15);border-radius:var(--r);padding:12px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--er);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Points d alerte</div>'+note.flags.map(function(f){return'<div style="font-size:13px;color:var(--er);padding:2px 0">⚠️ '+f+'</div>';}).join('')+'</div>':'')
+    + (note.body?'<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px"><div style="font-size:14px;line-height:1.8;color:var(--tx2);white-space:pre-wrap">'+note.body+'</div></div>':'<div style="font-size:13px;color:var(--tx3)">Aucune observation ecrite.</div>');
+  document.getElementById('shop-save-btn').style.display='none';
+}
+
+function deleteShopNote(idx, noteIdx){
+  var meta = loadShopMeta(idx);
+  meta.notes.splice(noteIdx,1);
+  saveShopMeta(meta);
+  showToast('Note supprimee');
+  shopTab('notes');
+}
+
+
+// ═══════════════════════════════════════════
+// PLANNING EDITORIAL MODULE
+// ═══════════════════════════════════════════
+
+var planningCurrentDate = new Date();
+var planningView = 'week'; // 'week' or 'month'
+var planningPosts = [];  // loaded from localStorage
+
+function planKey(){ return 'galzin_planning_v1'; }
+function loadPlanningData(){ var s=localStorage.getItem(planKey()); planningPosts=s?JSON.parse(s):[]; }
+function savePlanningData(){ localStorage.setItem(planKey(),JSON.stringify(planningPosts)); }
+
+var NETWORKS = ['Instagram','TikTok','Instagram + TikTok','Facebook','Google','Story','Autre'];
+var CONTENT_TYPES = ['Vidéo','Reel','Photo','Carrousel','Story','Post texte'];
+var POST_STATUS = ['Idée','En production','Prêt','Publié','Annulé'];
+var STATUS_COLORS = {
+  'Idée':'var(--tx3)', 'En production':'var(--wa)', 'Prêt':'var(--bl)',
+  'Publié':'var(--ok)', 'Annulé':'var(--er)'
+};
+var STATUS_BACKGROUNDS = {
+  'Idée':'var(--bg3)', 'En production':'var(--wa-bg)', 'Prêt':'var(--bl-bg)',
+  'Publié':'var(--ok-bg)', 'Annulé':'var(--er-bg)'
+};
+var NET_EMOJIS = {'Instagram':'📸','TikTok':'🎵','Instagram + TikTok':'📸🎵','Facebook':'📘','Google':'🔍','Story':'⭕','Autre':'📢'};
+
+function loadPlanning(){
+  loadPlanningData();
+  renderPlanning();
+}
+
+function renderPlanning(){
+  var el = document.getElementById('planning-content');
+  if(!el) return;
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  
+  // Get current week dates
+  var weekStart = new Date(planningCurrentDate);
+  weekStart.setHours(0,0,0,0);
+  var dow = weekStart.getDay();
+  weekStart.setDate(weekStart.getDate() - (dow===0?6:dow-1)); // Monday
+  
+  var days = [];
+  for(var i=0;i<7;i++){
+    var d = new Date(weekStart);
+    d.setDate(weekStart.getDate()+i);
+    days.push(d);
+  }
+  
+  var weekLabel = weekStart.toLocaleDateString('fr-FR',{day:'numeric',month:'long'}) + ' – ' + days[6].toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  
+  var html = 
+    // Header controls
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
+    + '<div style="display:flex;align-items:center;gap:8px">'
+    + '<button onclick="planningNav(-1)" style="width:34px;height:34px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--bd);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>'
+    + '<span style="font-size:14px;font-weight:600;color:var(--tx)">'+weekLabel+'</span>'
+    + '<button onclick="planningNav(1)" style="width:34px;height:34px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--bd);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>'
+    + '</div>'
+    + '<div style="display:flex;gap:7px;align-items:center">'
+    + '<button onclick="planningToday()" style="padding:7px 12px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--bd);font-size:12px;font-weight:600;cursor:pointer;color:var(--tx2);font-family:var(--f)">Aujourd hui</button>'
+    + '<button onclick="newPost(null)" style="padding:8px 14px;border-radius:var(--r);background:var(--br);color:var(--or);border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Post</button>'
+    + '</div></div>'
+    // Week grid
+    + '<div style="display:flex;flex-direction:column;gap:6px">';
+  
+  var FR_DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  days.forEach(function(d, di){
+    var isToday = d.getTime()===today.getTime();
+    var dateStr = d.toISOString().split('T')[0];
+    var dayPosts = planningPosts.filter(function(p){ return p.date===dateStr; });
+    
+    html += '<div style="background:var(--bg2);border:1.5px solid '+(isToday?'var(--or)':'var(--bd)')+';border-radius:var(--r2);overflow:hidden">'
+      // Day header
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:'+(isToday?'var(--or-pale)':'var(--bg3)')+';cursor:pointer" onclick="newPost(\''+dateStr+'\')">'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:'+(isToday?'var(--or)':'var(--tx3)')+'">'+FR_DAYS[di]+'</span>'
+      + '<span style="font-size:15px;font-weight:700;color:'+(isToday?'var(--or)':'var(--tx)')+'">' +d.getDate()+' '+d.toLocaleDateString('fr-FR',{month:'short'})+'</span>'
+      + (isToday?'<span style="font-size:10px;font-weight:700;padding:2px 7px;background:var(--or);color:var(--br);border-radius:10px">Aujourd hui</span>':'')
+      + '</div>'
+      + '<span style="font-size:11px;color:var(--or);font-weight:600">+ Post</span>'
+      + '</div>';
+    
+    if(dayPosts.length){
+      html += '<div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px">';
+      dayPosts.forEach(function(post){
+        var sBg = STATUS_BACKGROUNDS[post.status]||'var(--bg3)';
+        var sCol = STATUS_COLORS[post.status]||'var(--tx3)';
+        html += '<div onclick="editPost(\''+post.id+'\')" style="display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:var(--r);background:'+sBg+';border:1px solid '+sCol+'33;cursor:pointer">'
+          + '<span style="font-size:16px">'+( NET_EMOJIS[post.network]||'📢')+'</span>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+post.title+'</div>'
+          + '<div style="font-size:11px;color:var(--tx3);margin-top:1px">'+(post.network||'')+(post.type?' · '+post.type:'')+'</div>'
+          + '</div>'
+          + '<span style="font-size:11px;font-weight:700;color:'+sCol+';padding:2px 7px;border-radius:10px;background:var(--bg2);flex-shrink:0">'+post.status+'</span>'
+          + '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="padding:8px 14px;font-size:12px;color:var(--bd)">Aucun post prevu</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  
+  // Stats semaine
+  var weekPosts = planningPosts.filter(function(p){
+    var pd = new Date(p.date); pd.setHours(0,0,0,0);
+    return pd >= days[0] && pd <= days[6];
+  });
+  if(weekPosts.length){
+    html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px;margin-top:12px">'
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:10px">Semaine en chiffres</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+      + '<div style="background:var(--bg3);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--tx3)">Posts</div><div style="font-size:20px;font-weight:700">'+weekPosts.length+'</div></div>'
+      + '<div style="background:var(--ok-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--ok)">Publiés</div><div style="font-size:20px;font-weight:700;color:var(--ok)">'+weekPosts.filter(function(p){return p.status==='Publié';}).length+'</div></div>'
+      + '<div style="background:var(--wa-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--wa)">En prod.</div><div style="font-size:20px;font-weight:700;color:var(--wa)">'+weekPosts.filter(function(p){return p.status==='En production';}).length+'</div></div>'
+      + '</div></div>';
+  }
+  
+  el.innerHTML = html;
+}
+
+function planningNav(dir){
+  planningCurrentDate.setDate(planningCurrentDate.getDate() + dir*7);
+  renderPlanning();
+}
+function planningToday(){
+  planningCurrentDate = new Date();
+  renderPlanning();
+}
+
+// Post editor panel
+function newPost(dateStr){
+  openPostEditor(null, dateStr);
+}
+function editPost(postId){
+  var post = planningPosts.find(function(p){return p.id===postId;});
+  openPostEditor(post, null);
+}
+
+function openPostEditor(post, defaultDate){
+  var existing = document.getElementById('post-panel');
+  if(existing) existing.remove();
+  var panel = document.createElement('div');
+  panel.id = 'post-panel';
+  panel.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)';
+  document.body.appendChild(panel);
+  
+  var today = new Date().toISOString().split('T')[0];
+  var isEdit = !!post;
+  
+  panel.innerHTML = 
+    '<div style="background:var(--br);border-bottom:2px solid var(--or);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">'
+    + '<button onclick="closePostPanel()" style="background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.25);border-radius:var(--r);padding:7px 13px;color:#FFF8E8;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)">← Retour</button>'
+    + '<span style="font-size:15px;font-weight:600;flex:1;color:#FFF8E8">'+(isEdit?'Modifier le post':'Nouveau post')+'</span>'
+    + '</div>'
+    + '<div style="padding:16px">'
+    + '<div class="mf-g"><label>Titre du post *</label><input type="text" id="post-title" value="'+(post?post.title:'')+'" placeholder="Ex: Recette fouace de l Aveyron..."/></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="mf-g"><label>Date</label><input type="date" id="post-date" value="'+(post?post.date:defaultDate||today)+'"/></div>'
+    + '<div class="mf-g"><label>Heure (optionnel)</label><input type="time" id="post-time" value="'+(post&&post.time?post.time:'09:00')+'"\/></div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="mf-g"><label>Reseau</label><select id="post-network">'+NETWORKS.map(function(n){return'<option'+(post&&post.network===n?' selected':'')+'>'+n+'</option>';}).join('')+'</select></div>'
+    + '<div class="mf-g"><label>Type de contenu</label><select id="post-type">'+CONTENT_TYPES.map(function(t){return'<option'+(post&&post.type===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'
+    + '</div>'
+    + '<div class="mf-g"><label>Statut</label><select id="post-status">'+POST_STATUS.map(function(s){return'<option'+(post&&post.status===s?' selected':(!post&&s==='Idée')?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>'
+    + '<div class="mf-g"><label>Brief / Description</label><textarea id="post-brief" placeholder="Decris le contenu, le message, le ton, les hashtags...">'+(post?post.brief||'':'')+'</textarea></div>'
+    + '<div class="mf-g"><label>Lien post publie (si disponible)</label><input type="url" id="post-url" value="'+(post?post.url||'':'')+'" placeholder="https://..."/></div>'
+    + '</div>'
+    + '<div style="padding:0 16px 24px;display:flex;flex-direction:column;gap:10px">'
+    + '<button onclick="savePost('+(isEdit?'\''+post.id+'\'':'null')+')" style="width:100%;padding:14px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">'+(isEdit?'Enregistrer les modifications':'Ajouter au planning')+'</button>'
+    + (isEdit?'<button onclick="deletePost(\''+post.id+'\')" style="width:100%;padding:13px;border-radius:var(--r2);background:var(--er-bg);color:var(--er);border:1.5px solid rgba(201,32,32,.2);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--f)">Supprimer ce post</button>':'')
+    + '</div>';
+  
+  requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+}
+
+function closePostPanel(){
+  var p = document.getElementById('post-panel');
+  if(p){ p.style.transform='translateX(100%)'; setTimeout(function(){p.remove();},300); }
+  renderPlanning();
+}
+
+function savePost(postId){
+  var title=document.getElementById('post-title').value.trim();
+  if(!title){showToast('Saisis un titre');return;}
+  var post = {
+    id: postId || ('p'+Date.now()),
+    title: title,
+    date: document.getElementById('post-date').value,
+    time: document.getElementById('post-time').value||'',
+    network: document.getElementById('post-network').value,
+    type: document.getElementById('post-type').value,
+    status: document.getElementById('post-status').value,
+    brief: document.getElementById('post-brief').value,
+    url: document.getElementById('post-url').value
+  };
+  if(postId){
+    var idx=planningPosts.findIndex(function(p){return p.id===postId;});
+    if(idx>-1) planningPosts[idx]=post; else planningPosts.push(post);
+  } else {
+    planningPosts.push(post);
+  }
+  savePlanningData();
+  showToast(postId?'Post mis a jour !':'Post ajoute !');
+  closePostPanel();
+}
+
+function deletePost(postId){
+  planningPosts=planningPosts.filter(function(p){return p.id!==postId;});
+  savePlanningData();
+  showToast('Post supprime');
+  closePostPanel();
+}
+
 
 // INIT
 if(sessionStorage.getItem('g_auth')==='1'){showSc('app');loadH();}else{showSc('sc-home');}
