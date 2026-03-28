@@ -1515,6 +1515,7 @@ function deleteShopNote(shopName, noteIdx){
 var planningCurrentDate = new Date();
 var planningView = 'week'; // 'week' or 'month'
 var planningPosts = [];  // loaded from localStorage
+var planningTasks = [];  // daily tasks/actions (school, meetings, todos...)
 
 function planKey(){ return 'galzin_planning_v1'; }
 function loadPlanningData(){
@@ -1536,6 +1537,48 @@ function upsertPlanningPost(p){
 }
 function deletePlanningPostRemote(id){api('DELETE','planning_posts?id=eq.'+id).catch(function(){});}
 
+var TASK_TYPES = ['École','Réunion','Création','Terrain','Admin','Perso','Autre'];
+var TASK_STATUS = ['À faire','En cours','Fait','Annulé'];
+var TASK_STATUS_COLORS = {'À faire':'var(--tx3)','En cours':'var(--wa)','Fait':'var(--ok)','Annulé':'var(--er)'};
+var TASK_STATUS_BG = {'À faire':'var(--bg3)','En cours':'var(--wa-bg)','Fait':'var(--ok-bg)','Annulé':'var(--er-bg)'};
+var TASK_ICONS = {'École':'🎓','Réunion':'👥','Création':'✏️','Terrain':'🏪','Admin':'📋','Perso':'⭐','Autre':'📌'};
+var TASKS_KEY = 'galzin_tasks_v1';
+
+function loadTasksData(){
+  var s = localStorage.getItem(TASKS_KEY);
+  planningTasks = s ? JSON.parse(s) : [];
+}
+function saveTasksData(){
+  localStorage.setItem(TASKS_KEY, JSON.stringify(planningTasks));
+}
+async function fetchTasksData(){
+  try{
+    var data = await api('GET','planning_posts?title=like.__TASK__%25&order=post_date.asc');
+    if(data && data.length){
+      planningTasks = data.map(function(r){
+        try{ return JSON.parse(r.brief||'{}'); }catch(e){ return null; }
+      }).filter(Boolean);
+      localStorage.setItem(TASKS_KEY, JSON.stringify(planningTasks));
+    }
+  }catch(e){ loadTasksData(); }
+}
+function upsertTask(t){
+  var payload = {
+    id: 'task_'+t.id,
+    title: '__TASK__:'+t.title,
+    post_date: t.date||null,
+    status: t.status||'À faire',
+    network: t.type||'Autre',
+    content_type: 'task',
+    brief: JSON.stringify(t),
+    updated_at: new Date().toISOString()
+  };
+  api('POST','planning_posts',payload,'resolution=merge-duplicates').catch(function(){});
+}
+function deleteTaskRemote(id){
+  api('DELETE','planning_posts?id=eq.task_'+id).catch(function(){});
+}
+
 var NETWORKS = ['Instagram','TikTok','Instagram + TikTok','Facebook','Google','Story','Autre'];
 var CONTENT_TYPES = ['Vidéo','Reel','Photo','Carrousel','Story','Post texte'];
 var POST_STATUS = ['Idée','En production','Prêt','Publié','Annulé'];
@@ -1550,8 +1593,8 @@ var STATUS_BACKGROUNDS = {
 var NET_EMOJIS = {'Instagram':'📸','TikTok':'🎵','Instagram + TikTok':'📸🎵','Facebook':'📘','Google':'🔍','Story':'⭕','Autre':'📢'};
 
 function loadPlanning(){
-  loadPlanningData(); renderPlanning(); // show cached first
-  fetchPlanningData().then(function(){ renderPlanning(); }).catch(function(){});
+  loadPlanningData(); loadTasksData(); renderPlanning(); // show cached first
+  Promise.all([fetchPlanningData(), fetchTasksData()]).then(function(){ renderPlanning(); }).catch(function(){});
 }
 
 function renderPlanning(){
@@ -1609,6 +1652,7 @@ function renderPlanning(){
     var isToday = d.getTime()===today.getTime();
     var dateStr = d.toISOString().split('T')[0];
     var dayPosts = planningPosts.filter(function(p){ return p.date===dateStr; });
+    var dayTasks = planningTasks.filter(function(t){ return t.date===dateStr; });
     
     html += '<div style="background:var(--bg2);border:1.5px solid '+(isToday?'var(--or)':'var(--bd)')+';border-radius:var(--r2);overflow:hidden">'
       // Day header
@@ -1618,27 +1662,53 @@ function renderPlanning(){
       + '<span style="font-size:15px;font-weight:700;color:'+(isToday?'var(--or)':'var(--tx)')+'">' +d.getDate()+' '+d.toLocaleDateString('fr-FR',{month:'short'})+'</span>'
       + (isToday?'<span style="font-size:10px;font-weight:700;padding:2px 7px;background:var(--or);color:var(--br);border-radius:10px">Aujourd hui</span>':'')
       + '</div>'
-      + '<span style="font-size:11px;color:var(--or);font-weight:600">+ Post</span>'
+      + '<div style="display:flex;gap:6px">'
+      + '<span onclick="newTask(\''+dateStr+'\')" style="font-size:11px;color:var(--bl);font-weight:600;cursor:pointer;padding:3px 8px;background:var(--bl-bg);border-radius:6px">+ Tâche</span>'
+      + '<span onclick="newPost(\''+dateStr+'\')" style="font-size:11px;color:var(--or);font-weight:600;cursor:pointer;padding:3px 8px;background:var(--or-pale);border-radius:6px">+ Post</span>'
+      + '</div>'
       + '</div>';
     
-    if(dayPosts.length){
-      html += '<div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px">';
-      dayPosts.forEach(function(post){
-        var sBg = STATUS_BACKGROUNDS[post.status]||'var(--bg3)';
-        var sCol = STATUS_COLORS[post.status]||'var(--tx3)';
-        html += '<div onclick="editPost(\''+post.id+'\')" style="display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:var(--r);background:'+sBg+';border:1px solid '+sCol+'33;cursor:pointer">'
-          + '<span style="font-size:16px">'+( NET_EMOJIS[post.network]||'📢')+'</span>'
+    // Tasks section
+    if(dayTasks.length){
+      html += '<div style="padding:6px 10px 2px;display:flex;flex-direction:column;gap:4px">';
+      dayTasks.forEach(function(task){
+        var tBg = TASK_STATUS_BG[task.status]||'var(--bg3)';
+        var tCol = TASK_STATUS_COLORS[task.status]||'var(--tx3)';
+        var done = task.status==='Fait';
+        html += '<div onclick="editTask(\''+task.id+'\')" style="display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:var(--r);background:'+tBg+';border:1px solid '+tCol+'22;cursor:pointer">'
+          + '<span style="font-size:14px">'+(TASK_ICONS[task.type]||'📌')+'</span>'
           + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+post.title+'</div>'
-          + '<div style="font-size:11px;color:var(--tx3);margin-top:1px">'+(post.network||'')+(post.type?' · '+post.type:'')+'</div>'
+          + '<div style="font-size:12px;font-weight:600;color:var(--tx)'+(done?';text-decoration:line-through;opacity:.5':'')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+task.title+'</div>'
+          + (task.time?'<div style="font-size:10px;color:var(--tx3)">'+task.time+'</div>':'')
           + '</div>'
-          + '<span style="font-size:11px;font-weight:700;color:'+sCol+';padding:2px 7px;border-radius:10px;background:var(--bg2);flex-shrink:0">'+post.status+'</span>'
+          + '<span style="font-size:10px;font-weight:700;color:'+tCol+';white-space:nowrap">'+task.status+'</span>'
           + '</div>';
       });
       html += '</div>';
-    } else {
-      html += '<div style="padding:8px 14px;font-size:12px;color:var(--bd)">Aucun post prevu</div>';
     }
+
+    // Posts section
+    if(dayPosts.length){
+      html += '<div style="padding:6px 10px 8px;display:flex;flex-direction:column;gap:5px">';
+      dayPosts.forEach(function(post){
+        var sBg = STATUS_BACKGROUNDS[post.status]||'var(--bg3)';
+        var sCol = STATUS_COLORS[post.status]||'var(--tx3)';
+        html += '<div onclick="editPost(\''+post.id+'\')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);background:'+sBg+';border:1px solid '+sCol+'33;cursor:pointer">'
+          + '<span style="font-size:14px">'+(NET_EMOJIS[post.network]||'📢')+'</span>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:12px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+post.title+'</div>'
+          + '<div style="font-size:10px;color:var(--tx3);margin-top:1px">'+(post.network||'')+(post.type?' · '+post.type:'')+'</div>'
+          + '</div>'
+          + '<span style="font-size:10px;font-weight:700;color:'+sCol+';padding:2px 6px;border-radius:8px;background:var(--bg2);white-space:nowrap">'+post.status+'</span>'
+          + '</div>';
+      });
+      html += '</div>';
+    }
+
+    if(!dayTasks.length && !dayPosts.length){
+      html += '<div style="padding:7px 14px;font-size:12px;color:var(--bd)">Rien de prévu</div>';
+    }
+
     html += '</div>';
   });
   html += '</div>';
@@ -1648,13 +1718,21 @@ function renderPlanning(){
     var pd = new Date(p.date); pd.setHours(0,0,0,0);
     return pd >= days[0] && pd <= days[6];
   });
-  if(weekPosts.length){
+  var weekTasks = planningTasks.filter(function(t){
+    var td = new Date(t.date); td.setHours(0,0,0,0);
+    return td >= days[0] && td <= days[6];
+  });
+  if(weekPosts.length || weekTasks.length){
     html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px;margin-top:12px">'
       + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--or);margin-bottom:10px">Semaine en chiffres</div>'
       + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
       + '<div style="background:var(--bg3);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--tx3)">Posts</div><div style="font-size:20px;font-weight:700">'+weekPosts.length+'</div></div>'
       + '<div style="background:var(--ok-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--ok)">Publiés</div><div style="font-size:20px;font-weight:700;color:var(--ok)">'+weekPosts.filter(function(p){return p.status==='Publié';}).length+'</div></div>'
-      + '<div style="background:var(--wa-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--wa)">En prod.</div><div style="font-size:20px;font-weight:700;color:var(--wa)">'+weekPosts.filter(function(p){return p.status==='En production';}).length+'</div></div>'
+      + '<div style="background:var(--wa-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--wa)">En prod.</div><div style="font-size:20px;font-weight:700;color:var(--wa)">'+weekPosts.filter(function(p){return p.status==="En production";}).length+'</div></div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'
+    + '<div style="background:var(--bl-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--bl)">Tâches</div><div style="font-size:20px;font-weight:700;color:var(--bl)">'+weekTasks.length+'</div></div>'
+    + '<div style="background:var(--ok-bg);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:10px;color:var(--ok)">Tâches faites</div><div style="font-size:20px;font-weight:700;color:var(--ok)">'+weekTasks.filter(function(t){return t.status==="Fait";}).length+'</div></div>'
       + '</div></div>';
   }
   
@@ -1857,6 +1935,109 @@ function applyEventsToPlanning(){
     }
   });
 }
+
+// ─── TASK EDITOR ───────────────────────────────────────────
+
+function newTask(dateStr){
+  openTaskEditor(null, dateStr);
+}
+function editTask(taskId){
+  var t = planningTasks.find(function(x){ return x.id===taskId; });
+  openTaskEditor(t, null);
+}
+
+function openTaskEditor(task, defaultDate){
+  var existing = document.getElementById('task-editor-panel');
+  if(existing) existing.remove();
+  var panel = document.createElement('div');
+  panel.id = 'task-editor-panel';
+  panel.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:350;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)';
+  document.body.appendChild(panel);
+
+  var today = new Date().toISOString().split('T')[0];
+  var isEdit = !!task;
+
+  var typeOpts = TASK_TYPES.map(function(t){
+    return '<option'+(task&&task.type===t?' selected':(!task&&t==='Autre')?' selected':'')+'>'+t+'</option>';
+  }).join('');
+  var statusOpts = TASK_STATUS.map(function(s){
+    return '<option'+(task&&task.status===s?' selected':(!task&&s==='À faire')?' selected':'')+'>'+s+'</option>';
+  }).join('');
+
+  panel.innerHTML =
+    '<div style="background:var(--br);border-bottom:2px solid var(--bl);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">'
+    + '<button onclick="closeTaskEditor()" style="background:rgba(26,96,200,.15);border:1px solid rgba(26,96,200,.3);border-radius:var(--r);padding:7px 13px;color:#FFF8E8;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)">← Retour</button>'
+    + '<span style="font-size:15px;font-weight:600;color:#FFF8E8;flex:1">'+(isEdit?'Modifier la tâche':'Nouvelle tâche')+'</span>'
+    + '</div>'
+    + '<div style="padding:16px">'
+
+    // Titre
+    + '<div class="mf-g"><label>Titre de la tâche *</label>'
+    + '<input type="text" id="task-title" value="'+(task?task.title:'')+'" placeholder="Ex: École IDRAC, Visite Balaruc, Brief réseau..."/></div>'
+
+    // Date + Heure
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="mf-g"><label>Date</label><input type="date" id="task-date" value="'+(task?task.date:defaultDate||today)+'"/></div>'
+    + '<div class="mf-g"><label>Heure (optionnel)</label><input type="time" id="task-time" value="'+(task&&task.time?task.time:'')+'"/></div>'
+    + '</div>'
+
+    // Type + Statut
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="mf-g"><label>Catégorie</label><select id="task-type">'+typeOpts+'</select></div>'
+    + '<div class="mf-g"><label>Statut</label><select id="task-status">'+statusOpts+'</select></div>'
+    + '</div>'
+
+    // Description
+    + '<div class="mf-g"><label>Notes / Description (optionnel)</label>'
+    + '<textarea id="task-notes" placeholder="Détails, adresse, lien, objectifs...">'+(task?task.notes||'':'')+'</textarea></div>'
+
+    + '</div>'
+    + '<div style="padding:0 16px 28px;display:flex;flex-direction:column;gap:10px">'
+    + '<button onclick="saveTask('+(isEdit?'\''+task.id+'\'':'null')+')" style="width:100%;padding:14px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">'+(isEdit?'Enregistrer':'Ajouter au planning')+'</button>'
+    + (isEdit?'<button onclick="deleteTask(\''+task.id+'\')" style="width:100%;padding:13px;border-radius:var(--r2);background:var(--er-bg);color:var(--er);border:1.5px solid rgba(201,32,32,.2);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--f)">Supprimer cette tâche</button>':'')
+    + '</div>';
+
+  requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
+}
+
+function closeTaskEditor(){
+  var p = document.getElementById('task-editor-panel');
+  if(p){ p.style.transform='translateX(100%)'; setTimeout(function(){p.remove();},300); }
+  renderPlanning();
+}
+
+function saveTask(taskId){
+  var title = document.getElementById('task-title').value.trim();
+  if(!title){ showToast('Saisis un titre'); return; }
+  var task = {
+    id: taskId || ('t'+Date.now()),
+    title: title,
+    date: document.getElementById('task-date').value,
+    time: document.getElementById('task-time').value||'',
+    type: document.getElementById('task-type').value,
+    status: document.getElementById('task-status').value,
+    notes: document.getElementById('task-notes').value||''
+  };
+  if(taskId){
+    var idx = planningTasks.findIndex(function(t){ return t.id===taskId; });
+    if(idx>-1) planningTasks[idx]=task; else planningTasks.push(task);
+  } else {
+    planningTasks.push(task);
+  }
+  saveTasksData();
+  upsertTask(task);
+  showToast(taskId?'Tâche mise à jour !':'Tâche ajoutée !');
+  closeTaskEditor();
+}
+
+function deleteTask(taskId){
+  planningTasks = planningTasks.filter(function(t){ return t.id!==taskId; });
+  saveTasksData();
+  deleteTaskRemote(taskId);
+  showToast('Tâche supprimée');
+  closeTaskEditor();
+}
+
 
 // Open the Events Manager panel
 function openEventsManager(){
