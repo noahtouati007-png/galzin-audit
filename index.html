@@ -1022,125 +1022,188 @@ var shopPanel = null;
 
 var SHOP_META = {};  // stores per-shop info: { id, name, manager, phone, email, address, notes[] }
 
-function shopKey(id){ return 'galzin_shop_'+id; }
-function loadShopMeta(id){
-  // returns cached or empty — async loading handled in renderShopPanel
-  var s = localStorage.getItem(shopKey(id));
-  return s ? JSON.parse(s) : {id:'shop_'+id,name:SHOPS[id]||'',manager:'',phone:'',email:'',address:'',horaires:'',notes:[]};
-}
-async function fetchShopMeta(id){
-  try{
-    // Load shop info
-    var meta_data = await api('GET','shop_meta?id=eq.shop_'+id);
-    var meta = (meta_data&&meta_data.length) ? {id:'shop_'+id,name:SHOPS[id],manager:meta_data[0].manager||'',phone:meta_data[0].phone||'',email:meta_data[0].email||'',address:meta_data[0].address||'',horaires:meta_data[0].horaires||'',notes:[]} : {id:'shop_'+id,name:SHOPS[id]||'',manager:'',phone:'',email:'',address:'',horaires:'',notes:[]};
-    // Load shop notes
-    var notes_data = await api('GET','shop_notes?shop_id=eq.shop_'+id+'&order=created_at.desc');
-    meta.notes = (notes_data||[]).map(function(n){return{id:n.id,title:n.title||'Note',body:n.body||'',flags:n.flags||[],date:n.note_date||new Date(n.created_at).toLocaleDateString('fr-FR'),created:n.created_at};});
-    localStorage.setItem(shopKey(id), JSON.stringify(meta));
-    return meta;
-  }catch(e){return loadShopMeta(id);}
-}
-function saveShopMeta(meta){
-  localStorage.setItem(shopKey(meta.id), JSON.stringify(meta));
-  // Sync to Supabase (shop_meta table, without notes field)
-  var payload={id:meta.id,shop_name:meta.name||'',manager:meta.manager||null,phone:meta.phone||null,email:meta.email||null,address:meta.address||null,horaires:meta.horaires||null,updated_at:new Date().toISOString()};
-  api('POST','shop_meta',payload,'resolution=merge-duplicates').catch(function(){});
-}
+// ═══════════════════════════════════════════════════
+// SHOPS DATA LAYER — Architecture propre et stable
+// 
+// Séparation claire :
+//   • SHOPS[]           = liste des noms (array JS + Supabase table shop_index)
+//   • shop_meta         = infos par boutique (manager, tel, etc.) — clé: "shop_NOM_ENCODE"
+//   • shop_notes        = notes par boutique — clé shop_id = "shop_NOM_ENCODE"
+//   • localStorage      = cache local (fallback hors ligne)
+// ═══════════════════════════════════════════════════
 
+var SHOPS_LS_KEY = 'galzin_shops_v3'; // clé localStorage pour la liste
 
-// ── SHOP MANAGEMENT (add / rename / delete) ──
+// Encode le nom de boutique en ID stable (pas d'index numérique)
+function shopId(name){
+  return 'shop_' + String(name||'').toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,40);
+}
+// Cache localStorage pour une boutique
+function shopCacheKey(name){ return 'galzin_smeta_' + shopId(String(name||'')); }
 
-// SHOPS is now dynamic — stored as a persisted array in localStorage + Supabase
-var SHOPS_KEY = 'galzin_shops_v2';
+// ── LISTE DES BOUTIQUES ──
 
 function initShops(){
-  // If a saved custom list exists, use it; otherwise keep the built-in array
-  var saved = localStorage.getItem(SHOPS_KEY);
-  if(saved){
-    try{ SHOPS = JSON.parse(saved); }catch(e){}
-  }
-  // Sync from Supabase shop_meta to pick up any server-side changes (names stored in shop_name)
-  // We just keep SHOPS as source of truth for now
+  var saved = localStorage.getItem(SHOPS_LS_KEY);
+  if(saved){ try{ SHOPS = JSON.parse(saved); }catch(e){} }
 }
 
 function persistShops(){
-  localStorage.setItem(SHOPS_KEY, JSON.stringify(SHOPS));
-  // Also push the list to Supabase as a single record so it's shared across devices
-  api('POST','shop_meta',{id:'__index__',shop_name:'__index__',manager:JSON.stringify(SHOPS),updated_at:new Date().toISOString()},'resolution=merge-duplicates').catch(function(){});
+  localStorage.setItem(SHOPS_LS_KEY, JSON.stringify(SHOPS));
+  // Supabase: on stocke la liste dans une table dédiée shop_index (id='__list__', data=JSON)
+  // On utilise shop_meta avec id='__list__' et shop_name='__list__' et le JSON dans horaires
+  var payload = {
+    id: '__list__',
+    shop_name: '__list__',
+    manager: null,
+    phone: null,
+    email: null,
+    address: null,
+    horaires: JSON.stringify(SHOPS),
+    updated_at: new Date().toISOString()
+  };
+  api('POST','shop_meta',payload,'resolution=merge-duplicates').catch(function(){});
 }
 
 function loadShopsIndex(){
-  // Try to load the shops list from Supabase
-  api('GET','shop_meta?id=eq.__index__').then(function(data){
-    if(data&&data.length&&data[0].manager){
-      try{
-        var remote = JSON.parse(data[0].manager);
-        if(Array.isArray(remote)&&remote.length>0){
-          SHOPS = remote;
-          localStorage.setItem(SHOPS_KEY, JSON.stringify(SHOPS));
-          loadShops(); // re-render with updated list
-        }
-      }catch(e){}
-    }
+  // Charger la liste depuis Supabase (champ horaires de l'enregistrement __list__)
+  api('GET','shop_meta?id=eq.__list__').then(function(data){
+    if(!data||!data.length||!data[0].horaires) return;
+    try{
+      var remote = JSON.parse(data[0].horaires);
+      if(Array.isArray(remote) && remote.length > 0){
+        SHOPS = remote;
+        localStorage.setItem(SHOPS_LS_KEY, JSON.stringify(SHOPS));
+        loadShops(); // rafraîchir l'affichage
+      }
+    }catch(e){}
   }).catch(function(){});
 }
 
+// ── INFOS PAR BOUTIQUE ──
+
+function loadShopMeta(name){
+  name = String(name||'');
+  // Lecture depuis cache localStorage d'abord
+  var s = localStorage.getItem(shopCacheKey(name));
+  if(s){ try{ return JSON.parse(s); }catch(e){} }
+  return { id: shopId(name), name: name, manager:'', phone:'', email:'', address:'', horaires:'' };
+}
+
+async function fetchShopMeta(name){
+  name = String(name||'');
+  // Charge infos + notes depuis Supabase
+  var sid = shopId(name);
+  try{
+    var [meta_res, notes_res] = await Promise.all([
+      api('GET','shop_meta?id=eq.'+sid),
+      api('GET','shop_notes?shop_id=eq.'+sid+'&order=created_at.desc')
+    ]);
+    var meta = { id: sid, name: name, manager:'', phone:'', email:'', address:'', horaires:'', notes:[] };
+    if(meta_res && meta_res.length){
+      var r = meta_res[0];
+      meta.manager = r.manager||'';
+      meta.phone   = r.phone||'';
+      meta.email   = r.email||'';
+      meta.address = r.address||'';
+      meta.horaires= r.horaires||'';
+    }
+    if(notes_res && notes_res.length){
+      meta.notes = notes_res.map(function(n){
+        return {
+          id: n.id,
+          title: n.title||'Note',
+          body: n.body||'',
+          flags: n.flags||[],
+          date: n.note_date || new Date(n.created_at).toLocaleDateString('fr-FR'),
+          created: n.created_at
+        };
+      });
+    }
+    // Mettre en cache
+    localStorage.setItem(shopCacheKey(name), JSON.stringify(meta));
+    return meta;
+  }catch(e){
+    return loadShopMeta(name);
+  }
+}
+
+function saveShopMeta(meta){
+  // Cache local
+  localStorage.setItem(shopCacheKey(meta.name||meta.id), JSON.stringify(meta));
+  // Supabase — uniquement les champs infos (pas les notes qui ont leur propre table)
+  var payload = {
+    id: shopId(meta.name||meta.id||shopName||''),
+    shop_name: meta.name||'',
+    manager: meta.manager||null,
+    phone: meta.phone||null,
+    email: meta.email||null,
+    address: meta.address||null,
+    horaires: meta.horaires||null,
+    updated_at: new Date().toISOString()
+  };
+  api('POST','shop_meta',payload,'resolution=merge-duplicates').catch(function(){});
+}
+
+// ── GESTION LISTE (ajouter / renommer / supprimer) ──
+
 function addShop(){
   var name = prompt('Nom de la nouvelle boutique :','');
-  if(!name || !name.trim()) return;
+  if(!name||!name.trim()) return;
   name = name.trim().toUpperCase();
-  if(SHOPS.indexOf(name) > -1){ showToast('Cette boutique existe déjà'); return; }
+  if(SHOPS.indexOf(name)>-1){ showToast('Cette boutique existe déjà'); return; }
   SHOPS.push(name);
   persistShops();
   loadShops();
   showToast('Boutique ajoutée !');
 }
 
-function editShopName(idx, evt){
+function editShopName(shopName, evt){
   evt.stopPropagation();
-  var current = SHOPS[idx];
-  var newName = prompt('Nouveau nom :', current);
-  if(!newName || !newName.trim() || newName.trim() === current) return;
+  var newName = prompt('Nouveau nom :', shopName);
+  if(!newName||!newName.trim()||newName.trim()===shopName) return;
   newName = newName.trim();
-  // Update the name everywhere
-  var oldId = 'shop_'+idx;
+  var idx = SHOPS.indexOf(shopName);
+  if(idx === -1) return;
+  // Renommer dans la liste
   SHOPS[idx] = newName;
   persistShops();
-  // Update cached meta if exists
-  var cached = localStorage.getItem(shopKey(idx));
-  if(cached){
+  // Migrer le cache local
+  var oldCache = localStorage.getItem(shopCacheKey(shopName));
+  if(oldCache){
     try{
-      var m = JSON.parse(cached);
+      var m = JSON.parse(oldCache);
       m.name = newName;
-      localStorage.setItem(shopKey(idx), JSON.stringify(m));
+      m.id = shopId(newName);
+      localStorage.setItem(shopCacheKey(newName), JSON.stringify(m));
+      localStorage.removeItem(shopCacheKey(shopName));
     }catch(e){}
   }
-  // Update Supabase shop_meta name
-  api('PATCH','shop_meta?id=eq.'+oldId,{shop_name:newName,updated_at:new Date().toISOString()}).catch(function(){});
+  // Renommer dans Supabase
+  var oldId = shopId(shopName);
+  var newId = shopId(newName);
+  api('PATCH','shop_meta?id=eq.'+oldId,{id:newId,shop_name:newName,updated_at:new Date().toISOString()}).catch(function(){});
+  api('PATCH','shop_notes?shop_id=eq.'+oldId,{shop_id:newId}).catch(function(){});
   loadShops();
   showToast('Boutique renommée !');
 }
 
-function deleteShop(idx, evt){
+function deleteShop(shopName, evt){
   evt.stopPropagation();
-  var name = SHOPS[idx];
-  // Check if audits exist for this shop
-  var auditCount = allA.filter(function(a){ return a.boutique === name; }).length;
-  var msg = 'Supprimer "'+name+'" ?';
-  if(auditCount > 0) msg += '\n\n⚠️ Attention : '+auditCount+' audit(s) liés à cette boutique (ils ne seront pas supprimés).';
+  var auditCount = allA.filter(function(a){ return a.boutique===shopName; }).length;
+  var msg = 'Supprimer "'+shopName+'" ?';
+  if(auditCount>0) msg += '\n\n⚠️ '+auditCount+' audit(s) lié(s) à cette boutique (non supprimés).';
   if(!confirm(msg)) return;
-  
-  // Remove from array — shift everything after down
-  SHOPS.splice(idx, 1);
+  var sid = shopId(shopName);
+  SHOPS = SHOPS.filter(function(s){ return s!==shopName; });
   persistShops();
-  // Clean up local cache for this shop
-  localStorage.removeItem(shopKey(idx));
-  // Clean up Supabase shop_meta + shop_notes
-  api('DELETE','shop_meta?id=eq.shop_'+idx).catch(function(){});
-  api('DELETE','shop_notes?shop_id=eq.shop_'+idx).catch(function(){});
+  localStorage.removeItem(shopCacheKey(shopName));
+  api('DELETE','shop_meta?id=eq.'+sid).catch(function(){});
+  api('DELETE','shop_notes?shop_id=eq.'+sid).catch(function(){});
   loadShops();
   showToast('Boutique supprimée');
 }
+
 
 function loadShops(){
   var el = document.getElementById('shops-content');
@@ -1178,9 +1241,10 @@ function loadShops(){
         var sc_col = sc>=4?'var(--ok)':sc>=3?'var(--wa)':'var(--er)';
         scoreHtml = '<span style="font-size:11px;font-weight:700;color:'+sc_col+';padding:2px 7px;border-radius:10px;background:'+(sc>=4?'var(--ok-bg)':sc>=3?'var(--wa-bg)':'var(--er-bg)')+'">'+sc+'/5</span>';
       }
+      var sEscaped = item.s.replace(/'/g,"\\'");
       html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
-        + '<div onclick="openShop('+item.i+')" style="width:40px;height:40px;border-radius:10px;background:var(--or-pale);border:1px solid var(--or-bdr);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;cursor:pointer">🏪</div>'
-        + '<div onclick="openShop('+item.i+')" style="flex:1;min-width:0;cursor:pointer">'
+        + '<div onclick="openShop(\''+(sEscaped)+'\')" style="width:40px;height:40px;border-radius:10px;background:var(--or-pale);border:1px solid var(--or-bdr);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;cursor:pointer">🏪</div>'
+        + '<div onclick="openShop(\''+(sEscaped)+'\')" style="flex:1;min-width:0;cursor:pointer">'
         + '<div style="font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.s+'</div>'
         + '<div style="font-size:11px;color:var(--tx3);margin-top:2px;display:flex;gap:10px">'
         + (auditCount ? '<span>📋 '+auditCount+' audit'+(auditCount>1?'s':'')+'</span>' : '<span style="color:var(--bd)">Aucun audit</span>')
@@ -1189,8 +1253,8 @@ function loadShops(){
         + '</div></div>'
         + '<div style="display:flex;align-items:center;gap:6px">'
         + scoreHtml
-        + '<button onclick="editShopName('+item.i+',event)" style="width:30px;height:30px;border-radius:8px;background:var(--bl-bg);border:1px solid rgba(26,96,200,.2);color:var(--bl);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Renommer">✏️</button>'
-        + '<button onclick="deleteShop('+item.i+',event)" style="width:30px;height:30px;border-radius:8px;background:var(--er-bg);border:1px solid rgba(201,32,32,.2);color:var(--er);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Supprimer">🗑</button>'
+        + '<button onclick="editShopName(\''+(sEscaped)+'\',event)" style="width:30px;height:30px;border-radius:8px;background:var(--bl-bg);border:1px solid rgba(26,96,200,.2);color:var(--bl);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Renommer">✏️</button>'
+        + '<button onclick="deleteShop(\''+(sEscaped)+'\',event)" style="width:30px;height:30px;border-radius:8px;background:var(--er-bg);border:1px solid rgba(201,32,32,.2);color:var(--er);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Supprimer">🗑</button>'
         + '</div>'
         + '</div>';
     });
@@ -1198,22 +1262,21 @@ function loadShops(){
   el.innerHTML = html;
 }
 
-function openShop(shopIdx){
-  currentShopId = shopIdx;
-  // Build slide panel
+function openShop(shopName){
+  shopName = String(shopName||'');
+  currentShopId = shopName; // now stores the name string
   var existing = document.getElementById('shop-panel');
   if(existing) existing.remove();
   var panel = document.createElement('div');
   panel.id = 'shop-panel';
   panel.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)';
   document.body.appendChild(panel);
-  fetchShopMeta(shopIdx).then(function(meta){
-    // cache it
-    localStorage.setItem(shopKey(shopIdx), JSON.stringify(meta));
-    renderShopPanel(shopIdx, panel);
-  }).catch(function(){
-    renderShopPanel(shopIdx, panel);
-  });
+  // Show cached version immediately, then refresh from Supabase
+  var cached = loadShopMeta(shopName);
+  renderShopPanel(shopName, cached, panel);
+  fetchShopMeta(shopName).then(function(meta){
+    renderShopPanel(shopName, meta, panel);
+  }).catch(function(){});
   requestAnimationFrame(function(){ panel.style.transform='translateX(0)'; });
 }
 
@@ -1223,9 +1286,7 @@ function closeShopPanel(){
   loadShops(); // refresh list
 }
 
-function renderShopPanel(idx, panel){
-  var meta = loadShopMeta(idx);
-  var shopName = SHOPS[idx];
+function renderShopPanel(shopName, meta, panel){
   var shopAudits = allA.filter(function(a){return a.boutique===shopName;}).sort(function(a,b){return new Date(b.date_audit||0)-new Date(a.date_audit||0);});
   
   panel.innerHTML = 
@@ -1233,7 +1294,7 @@ function renderShopPanel(idx, panel){
     '<div style="background:var(--br);border-bottom:2px solid var(--or);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">'
     + '<button onclick="closeShopPanel()" style="background:rgba(200,134,10,.12);border:1px solid rgba(200,134,10,.25);border-radius:var(--r);padding:7px 13px;color:#FFF8E8;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)">← Retour</button>'
     + '<span style="font-size:14px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#FFF8E8">'+shopName+'</span>'
-    + '<button onclick="saveShopInfo('+idx+')" style="font-size:13px;font-weight:700;color:var(--or);padding:7px 13px;border:1px solid rgba(200,134,10,.4);border-radius:var(--r);background:rgba(200,134,10,.1);cursor:pointer;font-family:var(--f)" id="shop-save-btn">Sauvegarder</button>'
+    + '<button onclick="saveShopInfo(\''+shopName+'\')" style="font-size:13px;font-weight:700;color:var(--or);padding:7px 13px;border:1px solid rgba(200,134,10,.4);border-radius:var(--r);background:rgba(200,134,10,.1);cursor:pointer;font-family:var(--f)" id="shop-save-btn">Sauvegarder</button>'
     + '</div>'
     // SHOP TABS
     + '<div style="display:flex;background:var(--bg2);border-bottom:1px solid var(--bd)">'
@@ -1243,7 +1304,7 @@ function renderShopPanel(idx, panel){
     + '</div>'
     + '<div id="shop-tab-content" style="padding:16px"></div>';
 
-  shopTabRender('info', idx, meta, shopAudits);
+  shopTabRender('info', shopName, meta, shopAudits);
 }
 
 function shopTab(tab){
@@ -1251,13 +1312,13 @@ function shopTab(tab){
     var btn = document.getElementById('stab-'+t);
     if(btn){ btn.style.color = t===tab?'var(--or)':'var(--tx3)'; btn.style.borderBottom = t===tab?'2px solid var(--or)':'2px solid transparent'; }
   });
-  var meta = loadShopMeta(currentShopId);
-  var shopName = SHOPS[currentShopId];
+  var shopName = currentShopId; // currentShopId is now the name string
+  var meta = loadShopMeta(shopName);
   var audits = allA.filter(function(a){return a.boutique===shopName;}).sort(function(a,b){return new Date(b.date_audit||0)-new Date(a.date_audit||0);});
-  shopTabRender(tab, currentShopId, meta, audits);
+  shopTabRender(tab, shopName, meta, audits);
 }
 
-function shopTabRender(tab, idx, meta, audits){
+function shopTabRender(tab, shopName, meta, audits){
   var el = document.getElementById('shop-tab-content');
   if(!el) return;
 
@@ -1296,14 +1357,14 @@ function shopTabRender(tab, idx, meta, audits){
     var html = 
       // Bouton nouvelle note
       '<div style="display:flex;justify-content:flex-end;margin-bottom:12px">'
-      + '<button onclick="newShopNote('+idx+')" style="display:flex;align-items:center;gap:5px;padding:9px 16px;background:var(--br);color:var(--or);border:1px solid rgba(200,134,10,.3);border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Nouvelle note</button>'
+      + '<button onclick="newShopNote('+shopName+')" style="display:flex;align-items:center;gap:5px;padding:9px 16px;background:var(--br);color:var(--or);border:1px solid rgba(200,134,10,.3);border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Nouvelle note</button>'
       + '</div>';
     if(!notes.length){
       html += '<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:14px;line-height:1.7">📝 Aucune note pour cette boutique.<br>Commence par en ajouter une !</div>';
     } else {
       notes.slice().reverse().forEach(function(n,ri){
         var realIdx = notes.length - 1 - ri;
-        html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:8px;cursor:pointer" onclick="openShopNote('+idx+','+realIdx+')">'
+        html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:8px;cursor:pointer" onclick="openShopNote('+shopName+','+realIdx+')">'
           + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
           + '<span style="font-size:13px;font-weight:700;color:var(--tx)">'+n.title+'</span>'
           + '<span style="font-size:11px;color:var(--tx3)">'+n.date+'</span>'
@@ -1335,8 +1396,9 @@ function shopTabRender(tab, idx, meta, audits){
   }
 }
 
-function saveShopInfo(idx){
-  var meta = loadShopMeta(idx);
+function saveShopInfo(shopName){
+  var meta = loadShopMeta(shopName);
+  meta.name=shopName;
   var fields = ['manager','phone','email','address','horaires'];
   fields.forEach(function(f){
     var el=document.getElementById('si-'+f);
@@ -1346,8 +1408,9 @@ function saveShopInfo(idx){
   showToast('Infos sauvegardees !');
 }
 
-function newShopNote(idx){
-  var meta = loadShopMeta(idx);
+function newShopNote(shopName){
+  var meta = loadShopMeta(shopName);
+  meta.name=shopName;
   // Open note editor
   var panel = document.getElementById('shop-panel');
   if(!panel) return;
@@ -1370,7 +1433,7 @@ function newShopNote(idx){
     + shopNoteQuestion('snq5','Les produits phares sont-ils bien mis en avant ?')
     + '</div></div>'
     + '<textarea id="snote-body" placeholder="Observations libres, points importants, actions a mener..." style="width:100%;padding:13px;border:1.5px solid var(--bd);border-radius:var(--r2);font-size:14px;background:var(--bg);font-family:var(--f);color:var(--tx);outline:none;resize:none;min-height:140px;line-height:1.7;margin-bottom:12px"></textarea>'
-    + '<button onclick="saveShopNote('+idx+')" style="width:100%;padding:14px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">Sauvegarder cette note</button>';
+    + '<button onclick="saveShopNote(\''+shopName+'\')" style="width:100%;padding:14px;border-radius:var(--r2);background:var(--br);color:var(--or);font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--f)">Sauvegarder cette note</button>';
   document.getElementById('shop-save-btn').style.display='none';
 }
 
@@ -1393,8 +1456,9 @@ function snqToggle(id, val){
   }
 }
 
-function saveShopNote(idx){
-  var meta = loadShopMeta(idx);
+function saveShopNote(shopName){
+  var meta = loadShopMeta(shopName);
+  meta.name=shopName;
   var title = document.getElementById('snote-title').value || ('Note du '+new Date().toLocaleDateString('fr-FR'));
   var body = document.getElementById('snote-body').value || '';
   // Collect flags from yes answers
@@ -1408,15 +1472,15 @@ function saveShopNote(idx){
   meta.notes.push(note);
   saveShopMeta(meta);
   // Save note to Supabase
-  var notePayload={id:'sn_'+Date.now(),shop_id:meta.id,title:note.title,body:note.body||null,flags:note.flags||[],note_date:note.date,created_at:new Date().toISOString()};
+  var notePayload={id:'sn_'+Date.now(),shop_id:shopId(shopName),title:note.title,body:note.body||null,flags:note.flags||[],note_date:note.date,created_at:new Date().toISOString()};
   api('POST','shop_notes',notePayload,'resolution=merge-duplicates').catch(function(){});
   showToast('Note sauvegardee !');
   document.getElementById('shop-save-btn').style.display='';
   shopTab('notes');
 }
 
-function openShopNote(idx, noteIdx){
-  var meta = loadShopMeta(idx);
+function openShopNote(shopName, noteIdx){
+  var meta = loadShopMeta(shopName);
   var note = meta.notes[noteIdx];
   if(!note) return;
   var el = document.getElementById('shop-tab-content');
@@ -1424,7 +1488,7 @@ function openShopNote(idx, noteIdx){
   el.innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
     + '<button onclick="shopTab(\'notes\')" style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;color:var(--tx2);font-family:var(--f)">← Notes</button>'
-    + '<div style="display:flex;gap:8px"><span style="font-size:11px;color:var(--tx3);align-self:center">'+note.date+'</span><button onclick="deleteShopNote('+idx+','+noteIdx+')" style="padding:6px 12px;border-radius:8px;background:var(--er-bg);border:1px solid rgba(201,32,32,.2);color:var(--er);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">Supprimer</button></div>'
+    + '<div style="display:flex;gap:8px"><span style="font-size:11px;color:var(--tx3);align-self:center">'+note.date+'</span><button onclick="deleteShopNote(\''+shopName+'\',\''+noteIdx+'\')" style="padding:6px 12px;border-radius:8px;background:var(--er-bg);border:1px solid rgba(201,32,32,.2);color:var(--er);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">Supprimer</button></div>'
     + '</div>'
     + '<div style="font-size:20px;font-weight:700;color:var(--tx);margin-bottom:12px">'+note.title+'</div>'
     + (note.flags&&note.flags.length?'<div style="background:var(--er-bg);border:1px solid rgba(201,32,32,.15);border-radius:var(--r);padding:12px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--er);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Points d alerte</div>'+note.flags.map(function(f){return'<div style="font-size:13px;color:var(--er);padding:2px 0">⚠️ '+f+'</div>';}).join('')+'</div>':'')
@@ -1432,8 +1496,9 @@ function openShopNote(idx, noteIdx){
   document.getElementById('shop-save-btn').style.display='none';
 }
 
-function deleteShopNote(idx, noteIdx){
-  var meta = loadShopMeta(idx);
+function deleteShopNote(shopName, noteIdx){
+  var meta = loadShopMeta(shopName);
+  meta.name=shopName;
   var note = meta.notes[noteIdx];
   meta.notes.splice(noteIdx,1);
   saveShopMeta(meta);
@@ -1523,6 +1588,19 @@ function renderPlanning(){
     + '<button onclick="openEventsManager()" style="padding:8px 12px;border-radius:var(--r);background:var(--bl-bg);color:var(--bl);border:1px solid rgba(26,96,200,.25);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">🔁 Événements</button>'
     + '<button onclick="newPost(null)" style="padding:8px 14px;border-radius:var(--r);background:var(--br);color:var(--or);border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Post</button>'
     + '</div></div>'
+    // Raccourcis liens externes
+    + '<div style="display:flex;gap:8px;margin-bottom:14px">'
+    + '<a href="https://galplan.galzin.fr/planning" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--bd);border-radius:var(--r2);text-decoration:none" id="btn-galplan">'
+    + '<span style="font-size:20px">📅</span>'
+    + '<div><div style="font-size:13px;font-weight:700;color:var(--tx)">Galplan</div><div style="font-size:11px;color:var(--tx3)">Planning Galzin</div></div>'
+    + '<span style="font-size:12px;color:var(--tx3);margin-left:auto">↗</span>'
+    + '</a>'
+    + '<a href="https://ws-edt-cd.wigorservices.net/WebPsDyn.aspx?action=posEDTLMS&serverID=C&Tel=noah.touati&date=03/26/2026&hashURL=9C448930EF761F5260921BEE91646C34B8BF0B9C03D120ACB87BC49614AC6B3F72C70AE3512326A2C94E05EFB02E20B3C8F16464519C33CD7FC79B1E2EFBF64A" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--bd);border-radius:var(--r2);text-decoration:none" id="btn-idrac">'
+    + '<span style="font-size:20px">🎓</span>'
+    + '<div><div style="font-size:13px;font-weight:700;color:var(--tx)">Cours IDRAC</div><div style="font-size:11px;color:var(--tx3)">Emploi du temps</div></div>'
+    + '<span style="font-size:12px;color:var(--tx3);margin-left:auto">↗</span>'
+    + '</a>'
+    + '</div>'
     // Week grid
     + '<div style="display:flex;flex-direction:column;gap:6px">';
   
