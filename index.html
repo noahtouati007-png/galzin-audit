@@ -1009,7 +1009,7 @@ function scrollChat(){var el=document.getElementById('chat-msgs');if(el)el.scrol
 
 // NAV
 function closePanel(id){document.getElementById(id).classList.remove('open');}
-function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops'){initShops();loadShops();loadShopsIndex();}else if(n==='planning'){initPlanning();loadPlanning();}}
+function sw(n,btn){document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});document.getElementById('pg-'+n).classList.add('on');btn.classList.add('on');if(n==='history')loadH();else if(n==='stats')loadStats();else if(n==='missions')loadMissions();else if(n==='notes'){loadMissions();loadNotes();}else if(n==='map')loadMap();else if(n==='shops'){initShops();loadShops();loadShopsIndex();}else if(n==='planning'){loadPlanning();}}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
 
@@ -1357,14 +1357,14 @@ function shopTabRender(tab, shopName, meta, audits){
     var html = 
       // Bouton nouvelle note
       '<div style="display:flex;justify-content:flex-end;margin-bottom:12px">'
-      + '<button onclick="newShopNote('+shopName+')" style="display:flex;align-items:center;gap:5px;padding:9px 16px;background:var(--br);color:var(--or);border:1px solid rgba(200,134,10,.3);border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Nouvelle note</button>'
+      + '<button onclick="newShopNote(\''+shopName+'\')" style="display:flex;align-items:center;gap:5px;padding:9px 16px;background:var(--br);color:var(--or);border:1px solid rgba(200,134,10,.3);border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">+ Nouvelle note</button>'
       + '</div>';
     if(!notes.length){
       html += '<div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:14px;line-height:1.7">📝 Aucune note pour cette boutique.<br>Commence par en ajouter une !</div>';
     } else {
       notes.slice().reverse().forEach(function(n,ri){
         var realIdx = notes.length - 1 - ri;
-        html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:8px;cursor:pointer" onclick="openShopNote('+shopName+','+realIdx+')">'
+        html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:16px;margin-bottom:8px;cursor:pointer" onclick="openShopNote(\'' + shopName + '\', ' + realIdx + ')">'  
           + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
           + '<span style="font-size:13px;font-weight:700;color:var(--tx)">'+n.title+'</span>'
           + '<span style="font-size:11px;color:var(--tx3)">'+n.date+'</span>'
@@ -1514,7 +1514,8 @@ function deleteShopNote(shopName, noteIdx){
 
 var planningCurrentDate = new Date();
 var planningView = 'week'; // 'week' or 'month'
-var planningPosts = [];  // loaded from localStorage
+var planningPosts = [];  // manual posts only (loaded from localStorage)
+var planningEventPosts = [];  // generated from recurring events (ephemeral, never saved)
 var planningTasks = [];  // daily tasks/actions (school, meetings, todos...)
 
 function planKey(){ return 'galzin_planning_v1'; }
@@ -1524,7 +1525,12 @@ function loadPlanningData(){
 async function fetchPlanningData(){
   try{
     var data = await api('GET','planning_posts?order=post_date.asc,post_time.asc');
-    planningPosts = (data||[]).map(function(r){return{id:r.id,title:r.title,date:r.post_date||'',time:r.post_time||'',network:r.network||'Instagram',type:r.content_type||'Post texte',status:r.status||'Idée',brief:r.brief||'',url:r.url||''};});
+    // Exclure les posts générés par événements (evt_) et les tâches (__TASK__) et les defs d'événements (__EVENT_DEF__)
+    planningPosts = (data||[]).filter(function(r){
+      return !r.id.startsWith('evt_') && !String(r.title||'').startsWith('__TASK__') && !String(r.title||'').startsWith('__EVENT_DEF__');
+    }).map(function(r){
+      return{id:r.id,title:r.title,date:r.post_date||'',time:r.post_time||'',network:r.network||'Instagram',type:r.content_type||'Post texte',status:r.status||'Idée',brief:r.brief||'',url:r.url||''};
+    });
     localStorage.setItem(planKey(), JSON.stringify(planningPosts));
   }catch(e){loadPlanningData();}
 }
@@ -1593,8 +1599,20 @@ var STATUS_BACKGROUNDS = {
 var NET_EMOJIS = {'Instagram':'📸','TikTok':'🎵','Instagram + TikTok':'📸🎵','Facebook':'📘','Google':'🔍','Story':'⭕','Autre':'📢'};
 
 function loadPlanning(){
-  loadPlanningData(); loadTasksData(); renderPlanning(); // show cached first
-  Promise.all([fetchPlanningData(), fetchTasksData()]).then(function(){ renderPlanning(); }).catch(function(){});
+  // 1. Cache local immédiat
+  loadPlanningData();
+  loadEvents();
+  loadTasksData();
+  applyEventsToPlanning();
+  renderPlanning();
+  // 2. Sync Supabase en arrière-plan
+  Promise.all([fetchPlanningData(), fetchTasksData(), fetchEventsFromSupabase()])
+    .then(function(){
+      // Regénère les evt_ manquants APRÈS la synchro (sans doublons car IDs stables)
+      applyEventsToPlanning();
+      renderPlanning();
+    })
+    .catch(function(){ renderPlanning(); });
 }
 
 function renderPlanning(){
@@ -1651,7 +1669,7 @@ function renderPlanning(){
   days.forEach(function(d, di){
     var isToday = d.getTime()===today.getTime();
     var dateStr = d.toISOString().split('T')[0];
-    var dayPosts = planningPosts.filter(function(p){ return p.date===dateStr; });
+    var dayPosts = planningPosts.concat(planningEventPosts).filter(function(p){ return p.date===dateStr; });
     var dayTasks = planningTasks.filter(function(t){ return t.date===dateStr; });
     
     html += '<div style="background:var(--bg2);border:1.5px solid '+(isToday?'var(--or)':'var(--bd)')+';border-radius:var(--r2);overflow:hidden">'
@@ -1714,7 +1732,7 @@ function renderPlanning(){
   html += '</div>';
   
   // Stats semaine
-  var weekPosts = planningPosts.filter(function(p){
+  var weekPosts = planningPosts.concat(planningEventPosts).filter(function(p){
     var pd = new Date(p.date); pd.setHours(0,0,0,0);
     return pd >= days[0] && pd <= days[6];
   });
@@ -1892,43 +1910,37 @@ function fetchEventsFromSupabase(){
 
 // Generate individual posts from event definitions into planningPosts
 function applyEventsToPlanning(){
+  // Recompute ephemeral event posts (never saved to Supabase or localStorage)
+  planningEventPosts = [];
   var DAYS_MAP = {0:'dim',1:'lun',2:'mar',3:'mer',4:'jeu',5:'ven',6:'sam'};
 
   planningEvents.forEach(function(ev){
     if(!ev.active) return;
     var from = new Date(ev.dateFrom);
-    var to = ev.dateTo ? new Date(ev.dateTo) : new Date(from.getFullYear(), from.getMonth()+3, from.getDate()); // default 3 months
+    var to = ev.dateTo ? new Date(ev.dateTo) : new Date(from.getFullYear(), from.getMonth()+3, from.getDate());
     to.setHours(23,59,59);
 
-    // Iterate through each day in range
     var d = new Date(from);
     d.setHours(0,0,0,0);
     var generated = 0;
-    while(d <= to && generated < 200){
-      var dow = d.getDay(); // 0=Sunday...6=Saturday
+    while(d <= to && generated < 500){
+      var dow = d.getDay();
       var dowKey = DAYS_MAP[dow];
       if(!ev.days || ev.days.indexOf(dowKey) > -1){
         var dateStr = d.toISOString().split('T')[0];
-        // Check if this generated post already exists
         var existingId = 'evt_' + ev.id + '_' + dateStr;
-        var alreadyExists = planningPosts.find(function(p){ return p.id === existingId; });
-        if(!alreadyExists){
-          var post = {
-            id: existingId,
-            title: ev.title,
-            date: dateStr,
-            time: ev.time || '',
-            network: ev.network || '',
-            type: ev.type || '',
-            status: ev.status || 'Idée',
-            brief: ev.brief || '',
-            url: '',
-            fromEvent: ev.id // mark as generated
-          };
-          planningPosts.push(post);
-          // Save to Supabase
-          upsertPlanningPost(post);
-        }
+        planningEventPosts.push({
+          id: existingId,
+          title: ev.title,
+          date: dateStr,
+          time: ev.time || '',
+          network: ev.network || '',
+          type: ev.type || '',
+          status: ev.status || 'Idée',
+          brief: ev.brief || '',
+          url: '',
+          fromEvent: ev.id
+        });
       }
       d.setDate(d.getDate()+1);
       generated++;
@@ -2054,9 +2066,7 @@ function openEventsManager(){
 function closeEventsPanel(){
   var p = document.getElementById('events-panel');
   if(p){ p.style.transform='translateX(100%)'; setTimeout(function(){p.remove();},300); }
-  // Re-apply events and re-render planning
   applyEventsToPlanning();
-  savePlanningData();
   renderPlanning();
 }
 
